@@ -24,7 +24,7 @@ export const LandingTab: React.FC<LandingTabProps> = ({ onNavigate }) => {
           </h1>
 
           <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl font-sans">
-            High-performance browser-native synthesizers, 16-step DAW workstations, and intelligent sound design matrices powered by server-side Gemini AI. Built in Pukekohe, New Zealand for global creators.
+            High-performance browser-native synthesizers, 32-step DAW workstations, and intelligent sound design matrices powered by server-side Gemini AI. Built in Pukekohe, New Zealand for global creators.
           </p>
 
           <div className="flex flex-wrap items-center gap-4 pt-2">
@@ -81,9 +81,9 @@ export const LandingTab: React.FC<LandingTabProps> = ({ onNavigate }) => {
           <div className="w-12 h-12 rounded-xl bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl font-bold">
             <i className="fas fa-sliders" />
           </div>
-          <h3 className="text-base font-bold text-white">16-Step DAW Sequencer</h3>
+          <h3 className="text-base font-bold text-white">32-Step DAW Sequencer</h3>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Multi-track step sequencer with kick, snare, hi-hat, and synth bass pattern arrangement at configurable tempos.
+            Multi-track 32-step sequencer with kick, snare, hi-hat, analog clap, and synth bass pattern arrangement at configurable tempos.
           </p>
         </div>
 

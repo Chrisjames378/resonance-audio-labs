@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { EngineModel, SynthParameters, WaveformType } from '../types';
+import { DAWTrack, EngineModel, SynthParameters, WaveformType } from '../types';
 import { audioEngine, KEY_BINDINGS, NOTE_FREQUENCIES } from '../lib/audioEngine';
-import { DAWSequencer } from '../lib/dawEngine';
+import { DAWSequencer, DEFAULT_TRACKS } from '../lib/dawEngine';
 
 interface SynthSandboxTabProps {
   engines: EngineModel[];
@@ -31,91 +31,104 @@ export const SynthSandboxTab: React.FC<SynthSandboxTabProps> = ({
     'Standard dual oscillator sawtooth/square template with standard lowpass filter response.'
   );
   const [isGenerating, setIsGenerating] = useState(false);
+  const [scopeMode, setScopeMode] = useState<'4d_waterfall' | '3d_circular' | '2d'>('4d_waterfall');
+  const [isRecordingSession, setIsRecordingSession] = useState(false);
+  const [lastAudioExport, setLastAudioExport] = useState<{ url: string; name: string } | null>(null);
+
+  const handleToggleRecord = async () => {
+    audioEngine.ensureAudioContext();
+    if (isRecordingSession) {
+      const result = await audioEngine.stopRecording();
+      setIsRecordingSession(false);
+      if (result) {
+        setLastAudioExport({
+          url: result.url,
+          name: `resonance-daw-session-${Date.now().toString().slice(-4)}.webm`,
+        });
+        onShowToast('Live Audio Session Exported & Ready for Download', 'success');
+      }
+    } else {
+      const ok = audioEngine.startRecording();
+      if (ok) {
+        setIsRecordingSession(true);
+        onShowToast('Recording live Master Bus session...', 'info');
+      } else {
+        onShowToast('Audio recording is not supported in this browser context', 'error');
+      }
+    }
+  };
 
   // DAW Sequencer state
-  const [dawSeq] = useState(() => new DAWSequencer(undefined, () => synthParams));
+  const seqRef = useRef<DAWSequencer | null>(null);
+  const synthParamsRef = useRef(synthParams);
+  useEffect(() => {
+    synthParamsRef.current = synthParams;
+  }, [synthParams]);
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [bpm, setBpm] = useState(120);
-  const [tracks, setTracks] = useState(() => dawSeq.getTracks());
-
-  useEffect(() => {
-    // Synchronize DAW state listener
-    const seq = new DAWSequencer(
-      (step, playing) => {
-        setCurrentStep(step);
-        setIsPlaying(playing);
-      },
-      () => synthParams
-    );
-    seq.setBPM(bpm);
-    seq.setTracks(tracks);
-    return () => {
-      seq.stop();
-    };
-  }, []);
-
-  useEffect(() => {
-    audioEngine.updateParameters(synthParams);
-  }, [synthParams]);
+  const [bpm, setBpm] = useState(124);
+  const [tracks, setTracks] = useState<DAWTrack[]>(() => JSON.parse(JSON.stringify(DEFAULT_TRACKS)));
+  const [stepPage, setStepPage] = useState<'p1' | 'p2' | 'all'>('all');
 
   useEffect(() => {
     if (canvasRef.current) {
-      audioEngine.attachOscilloscope(canvasRef.current, { strokeColor: '#6366f1', fillColor: '#020617', lineWidth: 2 });
+      audioEngine.attachOscilloscope(canvasRef.current, { strokeColor: '#6366f1', fillColor: '#020617', lineWidth: 2, mode: scopeMode });
     }
     if (dawCanvasRef.current) {
-      audioEngine.attachOscilloscope(dawCanvasRef.current, { strokeColor: '#10b981', fillColor: '#090d16', lineWidth: 1.5 });
+      audioEngine.attachOscilloscope(dawCanvasRef.current, { strokeColor: '#10b981', fillColor: '#090d16', lineWidth: 1.5, mode: '2d' });
     }
     return () => {
       if (canvasRef.current) audioEngine.detachOscilloscope(canvasRef.current);
       if (dawCanvasRef.current) audioEngine.detachOscilloscope(dawCanvasRef.current);
     };
-  }, [canvasRef.current, dawCanvasRef.current]);
+  }, [canvasRef.current, dawCanvasRef.current, scopeMode]);
 
-  // Keyboard events
+  const handleScopeModeChange = (mode: '4d_waterfall' | '3d_circular' | '2d') => {
+    setScopeMode(mode);
+    if (canvasRef.current) {
+      audioEngine.setOscilloscopeMode(canvasRef.current, mode);
+    }
+  };
+
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      const key = e.key.toLowerCase();
-      const note = KEY_BINDINGS[key];
-      if (note) {
-        audioEngine.noteOn(note, synthParams, setActiveNotes);
-      }
-    };
+    seqRef.current = new DAWSequencer(
+      (step, playing) => {
+        setCurrentStep(step);
+        setIsPlaying(playing);
+      },
+      () => synthParamsRef.current
+    );
+    seqRef.current.setBPM(bpm);
+    seqRef.current.setTracks(tracks);
 
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      const key = e.key.toLowerCase();
-      const note = KEY_BINDINGS[key];
-      if (note) {
-        audioEngine.noteOff(note, synthParams.release, setActiveNotes);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
+      if (seqRef.current) {
+        seqRef.current.stop();
+      }
     };
-  }, [synthParams]);
+  }, []);
 
   const handleToggleStep = (trackIdx: number, stepIdx: number) => {
     const updated = [...tracks];
     updated[trackIdx].steps[stepIdx] = updated[trackIdx].steps[stepIdx] ? 0 : 1;
     setTracks(updated);
-    dawSeq.setTracks(updated);
+    if (seqRef.current) {
+      seqRef.current.setTracks(updated);
+    }
   };
 
   const handleTogglePlay = () => {
     audioEngine.ensureAudioContext();
+    if (!seqRef.current) return;
+
     if (isPlaying) {
-      dawSeq.stop();
+      seqRef.current.stop();
       setIsPlaying(false);
     } else {
-      dawSeq.setTracks(tracks);
-      dawSeq.setBPM(bpm);
-      dawSeq.start();
+      seqRef.current.setTracks(tracks);
+      seqRef.current.setBPM(bpm);
+      seqRef.current.start();
       setIsPlaying(true);
     }
   };
@@ -123,7 +136,44 @@ export const SynthSandboxTab: React.FC<SynthSandboxTabProps> = ({
   const handleBpmChange = (newBpm: number) => {
     const val = Math.max(60, Math.min(240, newBpm));
     setBpm(val);
-    dawSeq.setBPM(val);
+    if (seqRef.current) {
+      seqRef.current.setBPM(val);
+    }
+  };
+
+  const handleClearPattern = () => {
+    const cleared = tracks.map((t) => ({ ...t, steps: Array(32).fill(0) }));
+    setTracks(cleared);
+    if (seqRef.current) {
+      seqRef.current.setTracks(cleared);
+    }
+    onShowToast('Cleared 32-step DAW sequence matrix', 'info');
+  };
+
+  const handleApplyPreset = (presetName: string) => {
+    let newTracks: DAWTrack[] = JSON.parse(JSON.stringify(DEFAULT_TRACKS));
+    if (presetName === 'synthwave') {
+      newTracks = [
+        { id: 't1', name: 'Kick Drum', sound: 'kick', steps: [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,1] },
+        { id: 't2', name: 'Snare Drum', sound: 'snare', steps: [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,1,0] },
+        { id: 't3', name: 'Closed HiHat', sound: 'hihat', steps: [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1] },
+        { id: 't4', name: 'Analog Clap', sound: 'clap', steps: [0,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,1,0, 0,0,0,0, 0,0,0,0, 1,0,0,0, 0,1,0,1] },
+        { id: 't5', name: 'PolyBLEP Bass C2', sound: 'bass', steps: [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0, 1,1,1,1] },
+      ];
+    } else if (presetName === 'breakbeat') {
+      newTracks = [
+        { id: 't1', name: 'Kick Drum', sound: 'kick', steps: [1,0,0,1, 0,0,1,0, 0,1,0,0, 1,0,0,0, 1,0,0,1, 0,0,1,0, 0,1,0,0, 1,0,1,0] },
+        { id: 't2', name: 'Snare Drum', sound: 'snare', steps: [0,0,0,0, 1,0,0,1, 0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,1, 0,0,0,0, 1,0,0,1] },
+        { id: 't3', name: 'Closed HiHat', sound: 'hihat', steps: [1,0,1,1, 1,0,1,0, 1,0,1,1, 1,0,1,0, 1,0,1,1, 1,0,1,0, 1,0,1,1, 1,1,1,1] },
+        { id: 't4', name: 'Analog Clap', sound: 'clap', steps: [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,1,0, 1,0,1,0] },
+        { id: 't5', name: 'PolyBLEP Bass C2', sound: 'bass', steps: [1,1,0,0, 0,1,0,0, 1,0,0,1, 0,0,1,0, 1,1,0,0, 0,1,0,0, 1,0,1,0, 0,1,1,0] },
+      ];
+    }
+    setTracks(newTracks);
+    if (seqRef.current) {
+      seqRef.current.setTracks(newTracks);
+    }
+    onShowToast(`Loaded '${presetName.toUpperCase()}' 32-Step Sequence Preset`, 'success');
   };
 
   const handleActivateAudio = () => {
@@ -303,16 +353,85 @@ export const SynthSandboxTab: React.FC<SynthSandboxTabProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Panel: Synthesis Controls (8 cols) */}
         <div className="lg:col-span-8 bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6 shadow-xl">
-          {/* Oscilloscope Screen */}
-          <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 relative">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-mono text-emerald-400 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                REALTIME ANALYSER OSCILLOSCOPE (FFT 2048)
+          {/* 4D REALTIME ANALYSER OSCILLOSCOPE Screen */}
+          <div className="bg-slate-950 border border-emerald-500/30 rounded-xl p-4 relative space-y-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-2">
+              <span className="text-xs font-mono text-emerald-400 flex items-center gap-2 font-bold">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                4D REALTIME ANALYSER OSCILLOSCOPE (DSP FFT 2048)
               </span>
-              <span className="text-xs font-mono text-slate-500">60 FPS Render Active</span>
+              <div className="flex items-center gap-1.5 self-end sm:self-auto">
+                <span className="text-[10px] font-mono text-slate-500 mr-1 uppercase">MODE:</span>
+                <button
+                  onClick={() => handleScopeModeChange('4d_waterfall')}
+                  className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-bold transition-all ${
+                    scopeMode === '4d_waterfall'
+                      ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-500/30'
+                      : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+                  }`}
+                >
+                  4D Hypercube
+                </button>
+                <button
+                  onClick={() => handleScopeModeChange('3d_circular')}
+                  className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-bold transition-all ${
+                    scopeMode === '3d_circular'
+                      ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/30'
+                      : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+                  }`}
+                >
+                  3D Radial
+                </button>
+                <button
+                  onClick={() => handleScopeModeChange('2d')}
+                  className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-bold transition-all ${
+                    scopeMode === '2d'
+                      ? 'bg-purple-600 text-white shadow-sm shadow-purple-500/30'
+                      : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+                  }`}
+                >
+                  2D Classic
+                </button>
+              </div>
             </div>
-            <canvas ref={canvasRef} className="w-full h-32 bg-slate-950 rounded-lg border border-slate-800/80" />
+            <div className="relative">
+              <canvas ref={canvasRef} className="w-full h-36 bg-slate-950 rounded-lg border border-slate-800/80 shadow-inner" />
+            </div>
+
+            {/* Live Master Bus Audio Session Recorder & Exporter */}
+            <div className="bg-slate-900/90 border border-slate-800 rounded-lg p-2.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs font-mono">
+              <div className="flex items-center gap-2">
+                <span className={`w-2.5 h-2.5 rounded-full ${isRecordingSession ? 'bg-rose-500 animate-ping' : 'bg-slate-600'}`}></span>
+                <span className="text-slate-200 font-bold uppercase">LIVE SESSION RECORDER:</span>
+                <span className="text-slate-400 text-[11px]">
+                  {isRecordingSession ? 'Recording Master Audio Output...' : 'Idle (Ready to capture)'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
+                <button
+                  onClick={handleToggleRecord}
+                  className={`px-3 py-1 rounded-md text-xs font-mono font-bold flex items-center gap-1.5 transition-all ${
+                    isRecordingSession
+                      ? 'bg-rose-600 hover:bg-rose-500 text-white animate-pulse shadow-md shadow-rose-600/30'
+                      : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
+                  }`}
+                >
+                  <i className={`fas ${isRecordingSession ? 'fa-stop-circle' : 'fa-circle'} ${isRecordingSession ? '' : 'text-rose-500'}`}></i>
+                  <span>{isRecordingSession ? 'STOP RECORDING' : 'RECORD SESSION'}</span>
+                </button>
+
+                {lastAudioExport && (
+                  <a
+                    href={lastAudioExport.url}
+                    download={lastAudioExport.name}
+                    className="px-3 py-1 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5 shadow-md shadow-emerald-600/20 text-xs transition-all"
+                  >
+                    <i className="fas fa-download"></i>
+                    <span>DOWNLOAD WAV/WEBM</span>
+                  </a>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* DAW Sequencer Workstation Panel */}
@@ -321,7 +440,7 @@ export const SynthSandboxTab: React.FC<SynthSandboxTabProps> = ({
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse"></span>
                 <h3 className="text-xs font-bold text-white font-mono uppercase tracking-wider">
-                  16-Step Web DAW Sequencer Engine
+                  32-Step Advanced Web DAW Workstation
                 </h3>
                 <a
                   href="https://agentic-sound-labs-886212716638.us-west1.run.app"
@@ -343,15 +462,6 @@ export const SynthSandboxTab: React.FC<SynthSandboxTabProps> = ({
                 </a>
               </div>
               <div className="flex items-center gap-3">
-                <a
-                  href="https://quindecim-mente.ai.studio"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="md:hidden inline-flex items-center gap-1 px-2 py-1 rounded bg-indigo-950 border border-indigo-500/30 text-indigo-300 text-[10px] font-mono"
-                >
-                  <i className="fas fa-external-link-alt text-[9px]"></i>
-                  <span>AI Studio</span>
-                </a>
                 <div className="flex items-center gap-2 text-xs font-mono">
                   <span className="text-slate-400">BPM:</span>
                   <input
@@ -365,14 +475,74 @@ export const SynthSandboxTab: React.FC<SynthSandboxTabProps> = ({
                 </div>
                 <button
                   onClick={handleTogglePlay}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold font-mono flex items-center gap-1.5 shadow-md ${
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold font-mono flex items-center gap-1.5 shadow-md ${
                     isPlaying
-                      ? 'bg-rose-600 hover:bg-rose-500 text-white'
-                      : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                      ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/20'
+                      : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/20'
                   }`}
                 >
                   <i className={`fas ${isPlaying ? 'fa-stop' : 'fa-play'}`}></i>
-                  <span>{isPlaying ? 'STOP SEQ' : 'START SEQ'}</span>
+                  <span>{isPlaying ? 'STOP SEQ' : 'START 32-STEP SEQ'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* DAW Controls Bar: Presets & Step View Toggle */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800 text-xs">
+              {/* Presets */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[11px] font-mono text-slate-400 font-semibold uppercase">PRESETS:</span>
+                <button
+                  onClick={() => handleApplyPreset('house')}
+                  className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] font-mono transition-colors"
+                >
+                  House 32
+                </button>
+                <button
+                  onClick={() => handleApplyPreset('synthwave')}
+                  className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] font-mono transition-colors"
+                >
+                  Synthwave
+                </button>
+                <button
+                  onClick={() => handleApplyPreset('breakbeat')}
+                  className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] font-mono transition-colors"
+                >
+                  Breakbeat
+                </button>
+                <button
+                  onClick={handleClearPattern}
+                  className="px-2 py-1 rounded bg-slate-900 hover:bg-rose-950 text-slate-400 hover:text-rose-300 border border-slate-800 text-[11px] font-mono transition-colors"
+                >
+                  Clear All
+                </button>
+              </div>
+
+              {/* Page Filter Buttons */}
+              <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-md border border-slate-800 self-end sm:self-auto">
+                <button
+                  onClick={() => setStepPage('p1')}
+                  className={`px-2.5 py-1 rounded text-[10px] font-mono font-bold transition-all ${
+                    stepPage === 'p1' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Steps 1-16
+                </button>
+                <button
+                  onClick={() => setStepPage('p2')}
+                  className={`px-2.5 py-1 rounded text-[10px] font-mono font-bold transition-all ${
+                    stepPage === 'p2' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Steps 17-32
+                </button>
+                <button
+                  onClick={() => setStepPage('all')}
+                  className={`px-2.5 py-1 rounded text-[10px] font-mono font-bold transition-all ${
+                    stepPage === 'all' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  All 32
                 </button>
               </div>
             </div>
@@ -393,28 +563,60 @@ export const SynthSandboxTab: React.FC<SynthSandboxTabProps> = ({
               </div>
             </div>
 
-            {/* Step Sequencer Grid */}
-            <div className="space-y-2 overflow-x-auto">
+            {/* Step Sequencer Grid (32 Steps) */}
+            <div className="space-y-2 overflow-x-auto pb-1 scrollbar-thin">
+              {/* Measure Number Header */}
+              <div className="flex items-center gap-2 min-w-max">
+                <span className="w-28 text-[10px] font-mono font-bold text-slate-500 uppercase">
+                  MEASURE STEP
+                </span>
+                <div className="flex items-center gap-1 flex-1">
+                  {Array.from({ length: 32 }).map((_, sIdx) => {
+                    if (stepPage === 'p1' && sIdx >= 16) return null;
+                    if (stepPage === 'p2' && sIdx < 16) return null;
+                    const isDownbeat = sIdx % 4 === 0;
+                    return (
+                      <span
+                        key={sIdx}
+                        className={`w-6 sm:w-7 text-center text-[9px] font-mono ${
+                          isDownbeat ? 'text-indigo-400 font-bold' : 'text-slate-600'
+                        }`}
+                      >
+                        {sIdx + 1}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+
               {tracks.map((track, tIdx) => (
-                <div key={track.id} className="flex items-center gap-2">
+                <div key={track.id} className="flex items-center gap-2 min-w-max">
                   <span className="w-28 text-xs font-mono font-semibold text-slate-300 truncate">
                     {track.name}
                   </span>
                   <div className="flex items-center gap-1 flex-1">
                     {track.steps.map((stepVal, sIdx) => {
+                      if (stepPage === 'p1' && sIdx >= 16) return null;
+                      if (stepPage === 'p2' && sIdx < 16) return null;
+
                       const isActive = stepVal === 1;
                       const isCurrent = isPlaying && currentStep === sIdx;
+                      const isBarBorder = sIdx > 0 && sIdx % 4 === 0;
+
                       return (
                         <button
                           key={sIdx}
                           onClick={() => handleToggleStep(tIdx, sIdx)}
-                          className={`w-7 h-7 rounded border text-[10px] font-mono transition-all flex items-center justify-center ${
+                          className={`w-6 h-6 sm:w-7 sm:h-7 rounded border text-[10px] font-mono transition-all flex items-center justify-center ${
+                            isBarBorder ? 'ml-1' : ''
+                          } ${
                             isActive
-                              ? 'bg-indigo-600 border-indigo-400 text-white'
-                              : 'bg-slate-900 border-slate-800 text-slate-500 hover:border-slate-700'
-                          } ${isCurrent ? 'ring-2 ring-emerald-400' : ''}`}
+                              ? 'bg-indigo-600 border-indigo-400 text-white shadow-sm shadow-indigo-500/40'
+                              : 'bg-slate-900 border-slate-800 text-slate-600 hover:border-slate-700 hover:text-slate-400'
+                          } ${isCurrent ? 'ring-2 ring-emerald-400 bg-emerald-900/60' : ''}`}
+                          title={`Track: ${track.name}, Step: ${sIdx + 1}`}
                         >
-                          {isActive ? '•' : ''}
+                          {isActive ? '•' : sIdx + 1}
                         </button>
                       );
                     })}

@@ -37,7 +37,7 @@ export const AddEngineModal: React.FC<AddEngineModalProps> = ({ isOpen, onClose,
       attack: Number(attack),
       release: Number(release),
       bpm: Number(bpm),
-      desc: desc.trim() || (type === 'synth' ? 'Custom subtractive synthesis model.' : 'Custom 16-step DAW workstation.'),
+      desc: desc.trim() || (type === 'synth' ? 'Custom subtractive synthesis model.' : 'Custom 32-step DAW workstation.'),
     };
 
     onAddEngine(newEngine);

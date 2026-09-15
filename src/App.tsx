@@ -51,10 +51,10 @@ const INITIAL_ENGINES: EngineModel[] = [
   },
   {
     id: 'daw_step_seq',
-    name: 'Resonance Studio 16-Step DAW',
+    name: 'Resonance Studio 32-Step DAW',
     type: 'daw',
-    bpm: 120,
-    desc: 'Real-time multi-track Web Audio API 16-step drum & bass sequencer workstation.',
+    bpm: 124,
+    desc: 'Real-time multi-track Web Audio API 32-step drum & bass sequencer workstation.',
   },
 ];
 

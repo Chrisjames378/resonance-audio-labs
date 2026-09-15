@@ -40,8 +40,8 @@ export interface EngineModel {
 export interface DAWTrack {
   id: string;
   name: string;
-  sound: 'kick' | 'snare' | 'hihat' | 'bass';
-  steps: number[]; // 16 elements (0 or 1)
+  sound: 'kick' | 'snare' | 'hihat' | 'clap' | 'bass' | 'lead';
+  steps: number[]; // 32 elements (0 or 1)
 }
 
 export interface EquipmentItem {

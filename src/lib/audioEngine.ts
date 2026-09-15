@@ -32,6 +32,15 @@ export const KEY_BINDINGS: Record<string, string> = {
   'k': 'C5',
 };
 
+export type OscilloscopeMode = '2d' | '4d_waterfall' | '3d_circular';
+
+interface CanvasTargetOptions {
+  strokeColor: string;
+  fillColor: string;
+  lineWidth?: number;
+  mode?: OscilloscopeMode;
+}
+
 class AudioEngine {
   private audioCtx: AudioContext | null = null;
   public filterNode: BiquadFilterNode | null = null;
@@ -41,9 +50,18 @@ class AudioEngine {
   private animationFrameId: number | null = null;
   private statusListeners: Array<(status: string) => void> = [];
 
+  private historyBuffer: Uint8Array[] = [];
+  private maxHistoryFrames = 14;
+  private phaseAngle = 0;
+
   public onStatusChange(listener: (status: string) => void) {
     this.statusListeners.push(listener);
   }
+
+  private mediaStreamDest: MediaStreamAudioDestinationNode | null = null;
+  private mediaRecorder: MediaRecorder | null = null;
+  private recordedChunks: Blob[] = [];
+  private isRecording = false;
 
   private notifyStatus(status: string) {
     this.statusListeners.forEach((l) => l(status));
@@ -76,6 +94,12 @@ class AudioEngine {
       this.analyser = this.audioCtx.createAnalyser();
       this.analyser.fftSize = 2048;
 
+      // MediaStream Destination for Audio Recording
+      if (typeof this.audioCtx.createMediaStreamDestination === 'function') {
+        this.mediaStreamDest = this.audioCtx.createMediaStreamDestination();
+        this.masterGain.connect(this.mediaStreamDest);
+      }
+
       // Routing: Osc -> Filter -> MasterGain -> Analyser -> Output
       this.filterNode.connect(this.masterGain);
       this.masterGain.connect(this.analyser);
@@ -87,6 +111,53 @@ class AudioEngine {
       this.notifyStatus('Audio Engine: Active');
     }
     return this.audioCtx;
+  }
+
+  public startRecording(): boolean {
+    const ctx = this.ensureAudioContext();
+    if (!ctx || !this.mediaStreamDest) return false;
+    try {
+      this.recordedChunks = [];
+      const mimeType = typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported('audio/webm')
+        ? 'audio/webm'
+        : '';
+      this.mediaRecorder = new MediaRecorder(this.mediaStreamDest.stream, mimeType ? { mimeType } : undefined);
+      this.mediaRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          this.recordedChunks.push(e.data);
+        }
+      };
+      this.mediaRecorder.start(100);
+      this.isRecording = true;
+      this.notifyStatus('Live Session Recording Active');
+      return true;
+    } catch (err) {
+      console.error('Failed to start media recorder:', err);
+      return false;
+    }
+  }
+
+  public stopRecording(): Promise<{ blob: Blob; url: string } | null> {
+    return new Promise((resolve) => {
+      if (!this.mediaRecorder || !this.isRecording) {
+        this.isRecording = false;
+        resolve(null);
+        return;
+      }
+      this.mediaRecorder.onstop = () => {
+        this.isRecording = false;
+        const type = this.mediaRecorder?.mimeType || 'audio/webm';
+        const blob = new Blob(this.recordedChunks, { type });
+        const url = URL.createObjectURL(blob);
+        this.notifyStatus('Recording Session Exported');
+        resolve({ blob, url });
+      };
+      this.mediaRecorder.stop();
+    });
+  }
+
+  public getIsRecording(): boolean {
+    return this.isRecording;
   }
 
   public updateParameters(params: SynthParameters) {
@@ -172,21 +243,29 @@ class AudioEngine {
     }
   }
 
-  private canvasTargets: Map<HTMLCanvasElement, { strokeColor: string; fillColor: string; lineWidth?: number }> = new Map();
+  private canvasTargets: Map<HTMLCanvasElement, CanvasTargetOptions> = new Map();
 
   public attachOscilloscope(
     canvas: HTMLCanvasElement,
-    options?: { strokeColor?: string; fillColor?: string; lineWidth?: number }
+    options?: CanvasTargetOptions
   ) {
     if (!canvas) return;
     this.canvasTargets.set(canvas, {
       strokeColor: options?.strokeColor || '#6366f1',
       fillColor: options?.fillColor || '#020617',
       lineWidth: options?.lineWidth || 2,
+      mode: options?.mode || '4d_waterfall',
     });
 
     if (this.animationFrameId === null) {
       this.startRenderLoop();
+    }
+  }
+
+  public setOscilloscopeMode(canvas: HTMLCanvasElement, mode: OscilloscopeMode) {
+    const existing = this.canvasTargets.get(canvas);
+    if (existing) {
+      existing.mode = mode;
     }
   }
 
@@ -200,7 +279,7 @@ class AudioEngine {
   }
 
   public startOscilloscope(canvas: HTMLCanvasElement) {
-    this.attachOscilloscope(canvas, { strokeColor: '#6366f1', fillColor: '#020617', lineWidth: 2 });
+    this.attachOscilloscope(canvas, { strokeColor: '#6366f1', fillColor: '#020617', lineWidth: 2, mode: '4d_waterfall' });
   }
 
   public stopOscilloscope() {
@@ -220,6 +299,14 @@ class AudioEngine {
       const dataArray = new Uint8Array(bufferLength);
       this.analyser.getByteTimeDomainData(dataArray);
 
+      // Store in history buffer for Z-axis 3D/4D depth calculation
+      const frameCopy = new Uint8Array(dataArray);
+      this.historyBuffer.unshift(frameCopy);
+      if (this.historyBuffer.length > this.maxHistoryFrames) {
+        this.historyBuffer.pop();
+      }
+
+      this.phaseAngle = (this.phaseAngle + 0.03) % (Math.PI * 2);
       const dpr = window.devicePixelRatio || 1;
 
       this.canvasTargets.forEach((opts, canvas) => {
@@ -231,31 +318,121 @@ class AudioEngine {
           canvas.height = (canvas.clientHeight || 80) * dpr;
         }
 
+        const mode = opts.mode || '4d_waterfall';
+        const w = canvas.width;
+        const h = canvas.height;
+
         ctx.fillStyle = opts.fillColor;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, w, h);
 
-        ctx.lineWidth = (opts.lineWidth || 2) * dpr;
-        ctx.strokeStyle = opts.strokeColor;
-        ctx.beginPath();
+        if (mode === '4d_waterfall') {
+          // 4D Realtime Analyser Oscilloscope
+          // Dim 1: X (Sample time), Dim 2: Y (Amplitude), Dim 3: Z (Depth history), Dim 4: Color spectrum velocity phase shift
+          ctx.lineWidth = 1 * dpr;
+          ctx.strokeStyle = 'rgba(99, 102, 241, 0.12)';
+          const vanishingX = w / 2;
+          const vanishingY = h * 0.35;
 
-        const sliceWidth = (canvas.width * 1.0) / bufferLength;
-        let x = 0;
-
-        for (let i = 0; i < bufferLength; i++) {
-          const v = dataArray[i] / 128.0;
-          const y = (v * canvas.height) / 2;
-
-          if (i === 0) {
-            ctx.moveTo(x, y);
-          } else {
-            ctx.lineTo(x, y);
+          // Perspective perspective grid
+          for (let gx = 0; gx <= w; gx += w / 8) {
+            ctx.beginPath();
+            ctx.moveTo(gx, h);
+            ctx.lineTo(vanishingX, vanishingY);
+            ctx.stroke();
           }
 
-          x += sliceWidth;
-        }
+          const numFrames = this.historyBuffer.length;
+          for (let z = numFrames - 1; z >= 0; z--) {
+            const buf = this.historyBuffer[z];
+            const scaleZ = 1 / (1 + z * 0.11);
+            const zYOffset = z * 2.5 * dpr;
+            const alpha = Math.pow(1 - z / numFrames, 1.3) * 0.95;
 
-        ctx.lineTo(canvas.width, canvas.height / 2);
-        ctx.stroke();
+            // 4th Dimension Spectral Hue Shift
+            const hue = (160 + z * 16 + this.phaseAngle * 40) % 360;
+            ctx.strokeStyle = z === 0
+              ? `hsla(${hue}, 95%, 65%, ${alpha})`
+              : `hsla(${hue}, 80%, 50%, ${alpha * 0.65})`;
+            ctx.lineWidth = (z === 0 ? (opts.lineWidth || 2.5) : Math.max(1, 2 - z * 0.12)) * dpr;
+
+            ctx.beginPath();
+            const step = Math.ceil(buf.length / 180);
+            let first = true;
+
+            for (let i = 0; i < buf.length; i += step) {
+              const v = buf[i] / 128.0;
+              const normalizedX = (i / buf.length - 0.5);
+              const projX = vanishingX + normalizedX * w * scaleZ;
+              const projY = (h / 2) + (v - 1.0) * (h * 0.45) * scaleZ - zYOffset;
+
+              if (first) {
+                ctx.moveTo(projX, projY);
+                first = false;
+              } else {
+                ctx.lineTo(projX, projY);
+              }
+            }
+            ctx.stroke();
+          }
+
+          // 4D HUD Overlay readout
+          ctx.fillStyle = '#10b981';
+          ctx.font = `${Math.floor(9 * dpr)}px monospace`;
+          ctx.fillText(`4D ANALYSER: ${numFrames} Z-SLICES • 60 FPS HUE-SHIFT`, 8 * dpr, 14 * dpr);
+
+        } else if (mode === '3d_circular') {
+          // 3D Vector Radial Mode
+          const cx = w / 2;
+          const cy = h / 2;
+          const radius = Math.min(w, h) * 0.32;
+          const buf = this.historyBuffer[0] || dataArray;
+
+          ctx.lineWidth = (opts.lineWidth || 2) * dpr;
+          const hue = (200 + this.phaseAngle * 50) % 360;
+          ctx.strokeStyle = `hsl(${hue}, 90%, 60%)`;
+          ctx.beginPath();
+
+          for (let i = 0; i < buf.length; i += Math.ceil(buf.length / 256)) {
+            const angle = (i / buf.length) * Math.PI * 2 + this.phaseAngle;
+            const v = buf[i] / 128.0;
+            const r = radius * (0.7 + v * 0.4);
+            const x = cx + Math.cos(angle) * r;
+            const y = cy + Math.sin(angle) * r;
+
+            if (i === 0) {
+              ctx.moveTo(x, y);
+            } else {
+              ctx.lineTo(x, y);
+            }
+          }
+          ctx.closePath();
+          ctx.stroke();
+
+        } else {
+          // Standard 2D Oscilloscope Mode
+          ctx.lineWidth = (opts.lineWidth || 2) * dpr;
+          ctx.strokeStyle = opts.strokeColor;
+          ctx.beginPath();
+
+          const sliceWidth = (w * 1.0) / bufferLength;
+          let x = 0;
+
+          for (let i = 0; i < bufferLength; i++) {
+            const v = dataArray[i] / 128.0;
+            const y = (v * h) / 2;
+
+            if (i === 0) {
+              ctx.moveTo(x, y);
+            } else {
+              ctx.lineTo(x, y);
+            }
+
+            x += sliceWidth;
+          }
+
+          ctx.lineTo(w, h / 2);
+          ctx.stroke();
+        }
       });
     };
 
