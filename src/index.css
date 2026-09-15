@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #0b0f19;
+    color: #e2e8f0;
+}
+
+code, pre, .font-mono {
+    font-family: 'Fira Code', monospace;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* Piano Keys Styling */
+.piano-key-white {
+    background: linear-gradient(to bottom, #f8fafc, #e2e8f0);
+    color: #0f172a;
+    border: 1px solid #94a3b8;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    transition: all 0.05s ease;
+}
+.piano-key-white:active, .piano-key-white.active {
+    background: linear-gradient(to bottom, #cbd5e1, #94a3b8);
+    transform: translateY(2px);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+}
+.piano-key-black {
+    background: linear-gradient(to bottom, #334155, #0f172a);
+    color: #f8fafc;
+    border: 1px solid #1e293b;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+    transition: all 0.05s ease;
+}
+.piano-key-black:active, .piano-key-black.active {
+    background: linear-gradient(to bottom, #475569, #1e293b);
+    transform: translateY(2px);
+}
+
+/* Print optimization */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    .print-only {
+        display: block !important;
+    }
+    .screen-only {
+        display: none !important;
+    }
+    body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+    }
+    .print-card {
+        background-color: #ffffff !important;
+        border: 1px solid #ccc !important;
+        color: #000000 !important;
+        box-shadow: none !important;
+    }
+    .print-text {
+        color: #000000 !important;
+    }
+}
+@media screen {
+    .print-only {
+        display: none !important;
+    }
+}
