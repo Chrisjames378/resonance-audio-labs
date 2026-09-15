@@ -4,11 +4,31 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Resonance Audio Labs - Enterprise Operations & Technical Hub</title>
-    <meta name="description" content="Enterprise Operations & Technical Hub - Web Audio Synthesis Engine, 16-Step DAW Sequencer, WINZ Proposal, Equipment Grant Builder, and Financial Projections." />
+    <meta name="description" content="Enterprise Operations & Technical Hub - Web Audio Synthesis Engine, 32-Step DAW Sequencer, WINZ Proposal, Equipment Grant Builder, and Financial Projections." />
     <meta property="og:title" content="Resonance Audio Labs - Enterprise Operations & Technical Hub" />
-    <meta property="og:description" content="Enterprise Operations & Technical Hub - Web Audio Synthesis Engine, 16-Step DAW Sequencer, WINZ Proposal, Equipment Grant Builder, and Financial Projections." />
+    <meta property="og:description" content="Enterprise Operations & Technical Hub - Web Audio Synthesis Engine, 32-Step DAW Sequencer, WINZ Proposal, Equipment Grant Builder, and Financial Projections." />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- WebSocket Connection Error Guard for Proxy / Sandbox Environments -->
+    <script>
+      (function() {
+        const NativeWebSocket = window.WebSocket;
+        if (!NativeWebSocket) return;
+
+        window.WebSocket = function ProxyWebSocket(url, protocols) {
+          const instance = protocols ? new NativeWebSocket(url, protocols) : new NativeWebSocket(url);
+          instance.addEventListener('error', function(event) {
+            // Prevent unhandled WebSocket error messages from logging benign errors in proxy environments
+            event.stopImmediatePropagation();
+          }, true);
+          return instance;
+        };
+
+        Object.assign(window.WebSocket, NativeWebSocket);
+        window.WebSocket.prototype = NativeWebSocket.prototype;
+      })();
+    </script>
 
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">

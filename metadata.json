@@ -1,6 +1,6 @@
 {
   "name": "Resonance Audio Labs",
-  "description": "Enterprise Operations & Technical Hub - Web Audio Synthesis Engine, 16-Step DAW Sequencer, Proposal, Equipment Grant Builder, and Financial Projections.",
+  "description": "Enterprise Operations & Technical Hub - Web Audio Synthesis Engine, 32-Step DAW Sequencer, Proposal, Equipment Grant Builder, and Financial Projections.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
