@@ -11,6 +11,7 @@ import { FinancialsTab } from './components/FinancialsTab';
 import { ArchitectureTab } from './components/ArchitectureTab';
 import { ContractorProposalTab } from './components/ContractorProposalTab';
 import { ProjectDashboardTab } from './components/ProjectDashboardTab';
+import { ProjectConveyorTab } from './components/conveyor/ProjectConveyorTab';
 import { AddEngineModal } from './components/AddEngineModal';
 import { Toast } from './components/Toast';
 
@@ -169,6 +170,10 @@ export default function App() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
         {activeTab === 'tab-landing' && <LandingTab onNavigate={setActiveTab} />}
 
+        {activeTab === 'tab-conveyor' && <ProjectConveyorTab onShowToast={showToast} />}
+
+        {activeTab === 'tab-portfolio' && <ProjectDashboardTab onShowToast={showToast} />}
+
         {activeTab === 'tab-sandbox' && (
           <SynthSandboxTab
             engines={engines}
@@ -190,8 +195,6 @@ export default function App() {
         {activeTab === 'tab-architecture' && <ArchitectureTab onShowToast={showToast} />}
 
         {activeTab === 'tab-hiring' && <ContractorProposalTab onShowToast={showToast} />}
-
-        {activeTab === 'tab-portfolio' && <ProjectDashboardTab onShowToast={showToast} />}
       </main>
 
       {/* Add Custom Engine Modal */}

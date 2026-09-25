@@ -1,6 +1,6 @@
 export type WaveformType = 'sawtooth' | 'square' | 'sine' | 'triangle';
 
-export type TabId = 'tab-landing' | 'tab-sandbox' | 'tab-proposal' | 'tab-budget' | 'tab-financials' | 'tab-architecture' | 'tab-hiring' | 'tab-portfolio';
+export type TabId = 'tab-landing' | 'tab-conveyor' | 'tab-portfolio' | 'tab-sandbox' | 'tab-proposal' | 'tab-budget' | 'tab-financials' | 'tab-architecture' | 'tab-hiring';
 
 export interface SynthParameters {
   wave1: WaveformType;

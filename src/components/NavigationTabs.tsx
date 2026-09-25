@@ -7,15 +7,22 @@ interface NavigationTabsProps {
 }
 
 export const NavigationTabs: React.FC<NavigationTabsProps> = ({ activeTab, onTabChange }) => {
-  const tabs: Array<{ id: TabId; label: string; icon: string }> = [
+  const tabs: Array<{ id: TabId; label: string; icon: string; badge?: string; badgeColor?: string }> = [
     { id: 'tab-landing', label: '0. Platform Landing & Overview', icon: 'fa-home' },
-    { id: 'tab-sandbox', label: '1. Interactive Synth Sandbox & AI', icon: 'fa-sliders-h' },
-    { id: 'tab-proposal', label: '2. Strategic Proposal & Plan', icon: 'fa-file-contract' },
-    { id: 'tab-budget', label: '3. Capital Equipment Allocations', icon: 'fa-calculator' },
-    { id: 'tab-financials', label: '4. Financial Projections & Exit Model', icon: 'fa-chart-line' },
-    { id: 'tab-architecture', label: '5. Technical Architecture & Schema', icon: 'fa-database' },
-    { id: 'tab-hiring', label: '6. Worker Hiring & Proposal Hub', icon: 'fa-user-check' },
-    { id: 'tab-portfolio', label: '7. Multi-Platform Project Dashboard', icon: 'fa-cubes' },
+    {
+      id: 'tab-conveyor',
+      label: '🌍 Project Conveyor (AMOC Hub)',
+      icon: 'fa-globe-americas',
+      badge: '★ #1 PRIORITY',
+      badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+    },
+    { id: 'tab-portfolio', label: '1. Multi-Platform Project Dashboard', icon: 'fa-cubes' },
+    { id: 'tab-sandbox', label: '2. Interactive Synth Sandbox & AI', icon: 'fa-sliders-h' },
+    { id: 'tab-proposal', label: '3. Strategic Proposal & Plan', icon: 'fa-file-contract' },
+    { id: 'tab-budget', label: '4. Capital Equipment Allocations', icon: 'fa-calculator' },
+    { id: 'tab-financials', label: '5. Financial Projections & Exit Model', icon: 'fa-chart-line' },
+    { id: 'tab-architecture', label: '6. Technical Architecture & Schema', icon: 'fa-database' },
+    { id: 'tab-hiring', label: '7. Worker Hiring & Proposal Hub', icon: 'fa-user-check' },
   ];
 
   return (
@@ -37,6 +44,11 @@ export const NavigationTabs: React.FC<NavigationTabsProps> = ({ activeTab, onTab
               >
                 <i className={`fas ${tab.icon}`}></i>
                 <span>{tab.label}</span>
+                {tab.badge && (
+                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono border font-bold ${tab.badgeColor || 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30'}`}>
+                    {tab.badge}
+                  </span>
+                )}
               </button>
             );
           })}

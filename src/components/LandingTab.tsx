@@ -8,6 +8,50 @@ interface LandingTabProps {
 export const LandingTab: React.FC<LandingTabProps> = ({ onNavigate }) => {
   return (
     <section id="tab-landing" className="tab-content space-y-10">
+      {/* Flagship Earth & Mankind #1 Priority Banner */}
+      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-cyan-950 border border-cyan-500/40 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-72 h-72 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="space-y-2 max-w-3xl">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-mono font-bold flex items-center gap-1.5 animate-pulse">
+                <i className="fas fa-globe-americas"></i>
+                NUMBER 1 PRIORITY PROJECT • EARTH & MANKIND
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 text-xs font-mono">
+                SaliBuoy Systems AMOC Stabilization Hub
+              </span>
+            </div>
+            <h2 className="text-xl sm:text-3xl font-extrabold text-white tracking-tight">
+              Project Conveyor <span className="text-cyan-400 font-mono text-lg sm:text-2xl">| SaliBuoy Systems</span>
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
+              Autonomous subsurface oceanographic buoys to stabilize the Atlantic Meridional Overturning Circulation (AMOC) & polar cryo-restoration. Mechanical downwelling restoration engineered to safeguard planet Earth.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={() => onNavigate('tab-conveyor')}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-lg shadow-cyan-600/30 cursor-pointer"
+            >
+              <i className="fas fa-compass"></i>
+              <span>Explore AMOC Hub</span>
+            </button>
+
+            <a
+              href="https://project-conveyor-hub.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs flex items-center gap-2 transition-all cursor-pointer"
+            >
+              <i className="fas fa-external-link-alt text-cyan-400"></i>
+              <span>Live App</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
       {/* Hero Section */}
       <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950/80 to-slate-900 border border-indigo-500/20 rounded-3xl p-8 sm:p-12 shadow-2xl">
         <div className="absolute top-0 right-0 -mt-12 -mr-12 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />

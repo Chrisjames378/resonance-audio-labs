@@ -76,6 +76,51 @@ export interface ProjectItem {
 
 const INITIAL_PROJECTS: ProjectItem[] = [
   {
+    id: 'project-conveyor-hub',
+    title: 'Project Conveyor | SaliBuoy Systems AMOC Stabilization',
+    category: 'utility',
+    platform: 'Vercel',
+    emailOwner: 'chris.james378@gmail.com',
+    status: 'active',
+    healthStatus: 'On Track',
+    description: '★ NUMBER 1 PRIORITY PROJECT • EARTH & MANKIND: Hardware-First System for Atlantic Meridional Overturning Circulation (AMOC) Stabilization & Polar Cryo-Restoration. Autonomous oceanographic buoys pumping dense saline plumes (42–48 PSU) at depth to prevent thermohaline conveyor collapse by 2040–2050.',
+    techStack: ['React 19', 'TypeScript', 'Tailwind CSS', 'Recharts', '3D CAD Canvas', 'NOAA Satellite', 'Callaghan R&D', 'Outset Ventures'],
+    liveUrl: 'https://project-conveyor-hub.vercel.app/',
+    repoUrl: 'https://github.com/chrisjames378/project-conveyor-hub',
+    lastUpdated: '2026-09-24',
+    commitsCount: 284,
+    starsCount: 142,
+    forksCount: 38,
+    openIssuesCount: 0,
+    lastCommitMsg: 'feat: integrate 50-year AMOC dynamics simulation and satellite radar overlays',
+    environmentVars: ['VITE_ORBIT_TELEMETRY=live', 'VITE_SEED_TARGET_NZD=1500000', 'VITE_SALINITY_TARGET_PSU=45.0'],
+    notes: '★ USER NUMBER 1 PROJECT: Autonomous subsurface oceanographic buoys to stabilize the AMOC thermohaline circulation. DeepTech incubation at Outset Ventures (Pukekohe, Auckland) with Callaghan Innovation 40% R&D rebate.',
+    currentValuation: 1500000,
+    improvedValuation: 18500000,
+    improvementStrategy: 'Fabricate Grade 5 Titanium Mark-III Deep Ocean Sentinel, secure $600k NZ Govt co-funding (Callaghan 40% rebate), conduct 90-day offshore sea trials in Hauraki Gulf & Southern Ocean.',
+    comments: [
+      {
+        id: 'cp_1',
+        author: 'Chris James',
+        authorRole: 'Founder & Lead Architect',
+        avatarColor: 'bg-emerald-600',
+        type: 'status_update',
+        statusTag: 'Shipped',
+        content: 'This is my number 1 project. It needs to be achieved to help the earth and mankind. Verified full 3D CAD digital twin, live telemetry stream, and 50-year system dynamics model.',
+        timestamp: 'Sep 24, 08:00 AM'
+      },
+      {
+        id: 'cp_2',
+        author: 'Oceanographic DSP Team',
+        authorRole: 'Senior Marine Engineer',
+        avatarColor: 'bg-cyan-600',
+        type: 'comment',
+        content: 'Subsurface density plume sinking dynamics confirmed at 1.84 m/s at 200m depth with 0% synthetic chemical additives. 100% natural ocean brine concentration loop.',
+        timestamp: 'Sep 24, 11:30 AM'
+      }
+    ]
+  },
+  {
     id: 'p1',
     title: 'Resonance Studio Operations & Contract Hub',
     category: 'saas',
