@@ -1,6 +1,6 @@
 export type WaveformType = 'sawtooth' | 'square' | 'sine' | 'triangle';
 
-export type TabId = 'tab-landing' | 'tab-sandbox' | 'tab-proposal' | 'tab-budget' | 'tab-financials' | 'tab-architecture';
+export type TabId = 'tab-landing' | 'tab-sandbox' | 'tab-proposal' | 'tab-budget' | 'tab-financials' | 'tab-architecture' | 'tab-hiring' | 'tab-portfolio';
 
 export interface SynthParameters {
   wave1: WaveformType;
@@ -21,6 +21,16 @@ export interface SynthPatch {
   attack: number;
   release: number;
   description: string;
+}
+
+export interface SynthPreset {
+  id: string;
+  name: string;
+  category: 'Lead' | 'Bass' | 'Pad' | 'Keys' | 'FX' | 'Custom';
+  description?: string;
+  params: SynthParameters;
+  isFactory?: boolean;
+  createdAt: number;
 }
 
 export interface EngineModel {

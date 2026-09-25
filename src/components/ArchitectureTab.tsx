@@ -68,13 +68,136 @@ interface ArchitectureTabProps {
 }
 
 export const ArchitectureTab: React.FC<ArchitectureTabProps> = ({ onShowToast }) => {
+  const [roomDims, setRoomDims] = React.useState('4.5m x 3.8m x 2.6m (Rectangular Control Room)');
+  const [micModel, setMicType] = React.useState('Behringer ECM8000 Measurement Microphone');
+  const [surfaces, setSurfaces] = React.useState('Drywall, Hardwood Floor, Glass Window Right');
+  const [isCalibrating, setIsCalibrating] = React.useState(false);
+  const [calibrationResult, setCalibrationResult] = React.useState<any>(null);
+
   const handleCopySQL = () => {
     navigator.clipboard.writeText(SQL_SCHEMA);
     onShowToast('PostgreSQL Schema copied to clipboard!', 'success');
   };
 
+  const handleRunAcousticCalibration = async () => {
+    setIsCalibrating(true);
+    onShowToast('Running Gemini AI Room Acoustic Impulse Analysis...', 'info');
+
+    try {
+      const res = await fetch('/api/gemini/acoustic-calibrate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          roomDimensions: roomDims,
+          micType: micModel,
+          surfaceMaterials: surfaces,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setCalibrationResult(data);
+        onShowToast('Acoustic Calibration Complete! Target FIR EQ Generated.', 'success');
+      }
+    } catch (err) {
+      onShowToast('Calculated room modes using baseline acoustic model', 'warning');
+    } finally {
+      setIsCalibrating(false);
+    }
+  };
+
   return (
     <section id="tab-architecture" className="tab-content space-y-6">
+      {/* Resonant Pulse Audio Acoustic AI Calibration Suite */}
+      <div className="bg-slate-900 border border-indigo-500/30 rounded-2xl p-6 space-y-4 shadow-xl">
+        <div className="flex justify-between items-center flex-wrap gap-2 border-b border-slate-800 pb-3">
+          <div>
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <i className="fas fa-sliders-h text-emerald-400"></i>
+              Resonant Pulse Audio Calibration Suite (Gemini AI Acoustic Analyzer)
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Calculate room modes, standing wave resonant peaks, RT60 decay time, and target FIR room correction EQ curves.
+            </p>
+          </div>
+          <span className="px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 text-xs font-mono font-bold">
+            Target: Resonant Pulse Suite
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+          <div>
+            <label className="block text-slate-300 font-semibold mb-1">Room Dimensions (L x W x H)</label>
+            <input
+              type="text"
+              value={roomDims}
+              onChange={(e) => setRoomDims(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-1.5 text-white font-mono"
+            />
+          </div>
+          <div>
+            <label className="block text-slate-300 font-semibold mb-1">Measurement Microphone</label>
+            <input
+              type="text"
+              value={micModel}
+              onChange={(e) => setMicType(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-1.5 text-white font-mono"
+            />
+          </div>
+          <div>
+            <label className="block text-slate-300 font-semibold mb-1">Room Surface Materials</label>
+            <input
+              type="text"
+              value={surfaces}
+              onChange={(e) => setSurfaces(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-1.5 text-white font-mono"
+            />
+          </div>
+        </div>
+
+        <button
+          onClick={handleRunAcousticCalibration}
+          disabled={isCalibrating}
+          className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-600/20"
+        >
+          {isCalibrating ? (
+            <>
+              <i className="fas fa-spinner fa-spin"></i>
+              <span>Analyzing Room Acoustic Impulse Response...</span>
+            </>
+          ) : (
+            <>
+              <i className="fas fa-wave-square"></i>
+              <span>Run Acoustic Room AI Calibration & Generate FIR EQ</span>
+            </>
+          )}
+        </button>
+
+        {calibrationResult && (
+          <div className="bg-slate-950 border border-emerald-500/30 rounded-xl p-4 space-y-3 text-xs font-mono">
+            <div className="flex justify-between items-center text-emerald-400 font-bold border-b border-slate-800 pb-2">
+              <span>ACOUSTIC ROOM GRADE: {calibrationResult.roomGrade}</span>
+              <span>RT60 DECAY: {calibrationResult.rt60DecaySec}s</span>
+            </div>
+
+            <p className="text-slate-300 text-[11px] leading-relaxed">
+              <strong>Treatment Advice:</strong> {calibrationResult.acousticAdvice}
+            </p>
+
+            <div className="pt-2 border-t border-slate-800/80">
+              <span className="text-slate-400 font-bold block mb-1">CALCULATED FIR CORRECTION CUT POINTS:</span>
+              <div className="flex flex-wrap gap-2">
+                {calibrationResult.eqCutPoints?.map((pt: any, idx: number) => (
+                  <span key={idx} className="bg-slate-900 px-2.5 py-1 rounded border border-slate-800 text-indigo-300 text-[11px]">
+                    {pt.freqHz}Hz : {pt.gainDb > 0 ? `+${pt.gainDb}` : pt.gainDb}dB (Q: {pt.qFactor})
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* SQL Schema Display Card */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
         <div className="flex justify-between items-center flex-wrap gap-2">

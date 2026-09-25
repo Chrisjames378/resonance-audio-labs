@@ -9,6 +9,8 @@ import { ProposalTab } from './components/ProposalTab';
 import { BudgetTab } from './components/BudgetTab';
 import { FinancialsTab } from './components/FinancialsTab';
 import { ArchitectureTab } from './components/ArchitectureTab';
+import { ContractorProposalTab } from './components/ContractorProposalTab';
+import { ProjectDashboardTab } from './components/ProjectDashboardTab';
 import { AddEngineModal } from './components/AddEngineModal';
 import { Toast } from './components/Toast';
 
@@ -183,9 +185,13 @@ export default function App() {
 
         {activeTab === 'tab-budget' && <BudgetTab onShowToast={showToast} />}
 
-        {activeTab === 'tab-financials' && <FinancialsTab />}
+        {activeTab === 'tab-financials' && <FinancialsTab onShowToast={showToast} />}
 
         {activeTab === 'tab-architecture' && <ArchitectureTab onShowToast={showToast} />}
+
+        {activeTab === 'tab-hiring' && <ContractorProposalTab onShowToast={showToast} />}
+
+        {activeTab === 'tab-portfolio' && <ProjectDashboardTab onShowToast={showToast} />}
       </main>
 
       {/* Add Custom Engine Modal */}
@@ -198,7 +204,7 @@ export default function App() {
       {/* Footer */}
       <footer className="border-t border-slate-800 bg-slate-950/80 py-6 text-center text-xs text-slate-500 no-print">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p>© 2026 Resonance Audio Labs Ltd • <a href="mailto:resonanceaudiolabs@gmail.com" className="text-indigo-400 hover:underline">resonanceaudiolabs@gmail.com</a> • <code className="text-indigo-400 font-mono">uniagant.website</code> • Pukekohe, NZ</p>
+          <p>© 2026 Resonance Audio Labs Ltd • <a href="mailto:resonanceaudiolabs@gmail.com" className="text-indigo-400 hover:underline">resonanceaudiolabs@gmail.com</a> • <code className="text-indigo-400 font-mono">uniagent.website</code> • Pukekohe, NZ</p>
           <div className="flex items-center gap-4 text-slate-400">
             <span className="hover:text-white cursor-pointer" onClick={() => setActiveTab('tab-landing')}>
               Landing

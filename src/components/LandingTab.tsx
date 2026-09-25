@@ -139,6 +139,18 @@ export const LandingTab: React.FC<LandingTabProps> = ({ onNavigate }) => {
                 agentic-sound-labs.run.app
               </a>
             </div>
+            <div className="bg-slate-950 p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-950/20 space-y-1">
+              <span className="text-emerald-400 text-[10px] uppercase font-semibold">Sonorus Melodious v12.3</span>
+              <a
+                href="https://sonorus-melodious-v12-3.ai.studio"
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs font-bold text-emerald-300 hover:text-white truncate block transition-colors flex items-center gap-1"
+              >
+                <span>sonorus-melodious-v12-3</span>
+                <i className="fas fa-external-link-alt text-[9px]"></i>
+              </a>
+            </div>
             <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1">
               <span className="text-slate-500 text-[10px] uppercase">AI Studio Host</span>
               <a

@@ -14,6 +14,8 @@ export const NavigationTabs: React.FC<NavigationTabsProps> = ({ activeTab, onTab
     { id: 'tab-budget', label: '3. Capital Equipment Allocations', icon: 'fa-calculator' },
     { id: 'tab-financials', label: '4. Financial Projections & Exit Model', icon: 'fa-chart-line' },
     { id: 'tab-architecture', label: '5. Technical Architecture & Schema', icon: 'fa-database' },
+    { id: 'tab-hiring', label: '6. Worker Hiring & Proposal Hub', icon: 'fa-user-check' },
+    { id: 'tab-portfolio', label: '7. Multi-Platform Project Dashboard', icon: 'fa-cubes' },
   ];
 
   return (

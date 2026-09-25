@@ -29,14 +29,34 @@ export const Header: React.FC<HeaderProps> = ({
                   PWA Platform v1.0.1
                 </span>
               </h1>
-              <p className="text-xs text-slate-400 font-mono">
-                <a href="mailto:resonanceaudiolabs@gmail.com" className="hover:text-indigo-300 transition-colors">resonanceaudiolabs@gmail.com</a> • <a href="https://quindecim-mente.ai.studio" target="_blank" rel="noreferrer" className="text-indigo-400 hover:underline">quindecim-mente.ai.studio</a> • Pukekohe, NZ
+              <p className="text-xs text-slate-400 font-mono flex items-center gap-1 flex-wrap">
+                <a href="mailto:resonanceaudiolabs@gmail.com" className="hover:text-indigo-300 transition-colors">resonanceaudiolabs@gmail.com</a>
+                <span>•</span>
+                <a href="https://sonorus-melodious-v12-3.ai.studio" target="_blank" rel="noreferrer" className="text-emerald-400 hover:underline flex items-center gap-1">
+                  <span>sonorus-melodious-v12-3.ai.studio</span>
+                  <i className="fas fa-external-link-alt text-[9px]"></i>
+                </a>
+                <span>•</span>
+                <a href="https://quindecim-mente.ai.studio" target="_blank" rel="noreferrer" className="text-indigo-400 hover:underline">quindecim-mente.ai.studio</a>
+                <span>•</span>
+                <span>Pukekohe, NZ</span>
               </p>
             </div>
           </div>
 
           {/* Action Controls */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <a
+              href="https://sonorus-melodious-v12-3.ai.studio"
+              target="_blank"
+              rel="noreferrer"
+              className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-mono font-medium transition-all shadow-sm"
+              title="Open Sonorus Melodious v12.3 AI Studio"
+            >
+              <i className="fas fa-wave-square text-[10px] text-emerald-400"></i>
+              <span>Sonorus v12.3</span>
+            </a>
+
             <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/50 text-xs text-slate-300">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span id="audio-engine-status">{audioStatus}</span>
