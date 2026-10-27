@@ -445,13 +445,124 @@ const INITIAL_PROJECTS: ProjectItem[] = [
     improvedValuation: 95000,
     improvementStrategy: 'Include measurement microphone hardware calibration curves, multi-point room measurement, and VST3/AU room correction plugin export.',
   },
+  {
+    id: 'p13',
+    title: 'Altamonte 205 Quantum AI Synth Album Studio',
+    category: 'synth',
+    platform: 'AI Studio',
+    emailOwner: 'chris.james378@gmail.com',
+    status: 'active',
+    healthStatus: 'On Track',
+    description: 'Quantum harmonic wavetable synthesis engine and generative multi-track album studio. Features neural chord voicing, quantum probabilistic timbre shifting, and automated master bus summing.',
+    techStack: ['React 18', 'Web Audio API', 'Quantum DSP', 'TypeScript', 'Tailwind CSS'],
+    liveUrl: 'https://altamonte-205-quantum-ai-synth-album-studio.ai.studio',
+    repoUrl: 'https://github.com/resonance-audio-labs/altamonte-205-quantum-synth',
+    lastUpdated: '2026-10-14',
+    commitsCount: 94,
+    starsCount: 62,
+    forksCount: 16,
+    openIssuesCount: 0,
+    lastCommitMsg: 'feat: connect quantum wavetable matrix to multi-track album arranger',
+    iconUrl: '/src/assets/images/icon_ripplerx_synth_1790255794520.jpg',
+    environmentVars: ['VITE_QUANTUM_STAGES=8', 'VITE_ALBUM_FORMAT=wav24_96k'],
+    notes: 'Federated quantum AI album studio and neural synth workstation on AI Studio.',
+    currentValuation: 45000,
+    improvedValuation: 160000,
+    improvementStrategy: 'Scale generative stem export pipeline, integrate spatial Dolby Atmos audio rendering, and direct distribution to streaming DSPs.',
+    comments: [
+      {
+        id: 'c4',
+        author: 'Chris James',
+        authorRole: 'Lead Architect',
+        avatarColor: 'bg-cyan-600',
+        type: 'status_update',
+        statusTag: 'In Progress',
+        content: 'Linked Altamonte 205 Quantum Studio into Resonance central operations and multi-platform dashboard.',
+        timestamp: 'Oct 14, 01:45 AM'
+      }
+    ]
+  },
+  {
+    id: 'p14',
+    title: 'Synth Horizons Gen PWA App Builder',
+    category: 'synth',
+    platform: 'AI Studio',
+    emailOwner: 'chris.james378@gmail.com',
+    status: 'active',
+    healthStatus: 'On Track',
+    description: 'Generative Progressive Web App (PWA) synth studio and visual sound architecture designer. Enables zero-install offline audio synthesis, Web Manifest generation, AudioWorklet DSP streaming, and cross-platform native wrapper compilation.',
+    techStack: ['PWA', 'React 18', 'AudioWorklet', 'Web Audio API', 'TypeScript', 'Tailwind CSS'],
+    liveUrl: 'https://synth-horizons-gen-pwa-app-builder.ai.studio',
+    repoUrl: 'https://github.com/resonance-audio-labs/synth-horizons-gen-pwa',
+    lastUpdated: '2026-10-14',
+    commitsCount: 112,
+    starsCount: 78,
+    forksCount: 22,
+    openIssuesCount: 0,
+    lastCommitMsg: 'feat: add offline service worker caching & installable web manifest builder',
+    iconUrl: '/src/assets/images/icon_ripplerx_synth_1790255794520.jpg',
+    environmentVars: ['VITE_PWA_CACHE_VERSION=v2.4', 'VITE_WORKLET_DSP=enabled'],
+    notes: 'Federated generative PWA synthesizer and app builder deployed on AI Studio.',
+    currentValuation: 52000,
+    improvedValuation: 185000,
+    improvementStrategy: 'Expand one-click app store packaging (Google Play TWA & iOS WebKit wrapper), add multi-track Web MIDI controller support, and offline cloud backup.',
+    comments: [
+      {
+        id: 'c5',
+        author: 'Chris James',
+        authorRole: 'Lead Architect',
+        avatarColor: 'bg-purple-600',
+        type: 'status_update',
+        statusTag: 'In Progress',
+        content: 'Integrated Synth Horizons Gen PWA App Builder into Resonance ecosystem and cross-studio federated network.',
+        timestamp: 'Oct 14, 02:00 AM'
+      }
+    ]
+  },
+  {
+    id: 'p15',
+    title: 'Universal AI Shopping Agent',
+    category: 'ai_agent',
+    platform: 'AI Studio',
+    emailOwner: 'uniagent.website',
+    status: 'active',
+    healthStatus: 'On Track',
+    description: 'Autonomous agentic multi-modal shopping and commerce intelligence assistant with natural language intent negotiation, real-time product discovery, voice synthesis, price tracking, and automated checkout pipelines.',
+    techStack: ['AI Agents', 'Gemini Multi-Modal', 'Voice Synthesis', 'TypeScript', 'Tailwind CSS', 'Vite'],
+    liveUrl: 'https://universal-ai-shopping-agent.ai.studio',
+    repoUrl: 'https://github.com/resonance-audio-labs/universal-ai-shopping-agent',
+    lastUpdated: '2026-10-14',
+    commitsCount: 134,
+    starsCount: 96,
+    forksCount: 31,
+    openIssuesCount: 0,
+    lastCommitMsg: 'feat: add voice intent synthesis and multi-retailer catalog semantic search',
+    iconUrl: '/src/assets/images/icon_uniagent_mesh_1790255815415.jpg',
+    environmentVars: ['VITE_AGENT_MODEL=gemini-2.5-flash', 'VITE_COMMERCE_GATEWAY=enabled'],
+    notes: 'Autonomous multi-modal shopping agent and commerce intelligence mesh on AI Studio.',
+    currentValuation: 68000,
+    improvedValuation: 240000,
+    improvementStrategy: 'Expand multi-merchant catalog integrations, real-time price arbitrage engine, multi-currency checkout bot, and ambient voice shopping interface.',
+    comments: [
+      {
+        id: 'c6',
+        author: 'Chris James',
+        authorRole: 'Lead Architect',
+        avatarColor: 'bg-amber-600',
+        type: 'status_update',
+        statusTag: 'In Progress',
+        content: 'Connected Universal AI Shopping Agent into Resonance federated operations suite and unified commerce dashboard.',
+        timestamp: 'Oct 14, 02:08 AM'
+      }
+    ]
+  },
 ];
 
 interface ProjectDashboardTabProps {
   onShowToast: (message: string, type?: 'info' | 'success' | 'warning' | 'error') => void;
 }
 
-const STORAGE_KEY = 'resonance_portfolio_projects_v4';
+const STORAGE_KEY = 'resonance_portfolio_projects_v6';
 
 export const ProjectDashboardTab: React.FC<ProjectDashboardTabProps> = ({ onShowToast }) => {
   const [projects, setProjects] = useState<ProjectItem[]>(() => {
@@ -576,10 +687,20 @@ export const ProjectDashboardTab: React.FC<ProjectDashboardTabProps> = ({ onShow
     onShowToast('Comment removed', 'info');
   };
 
+  // Report Modal state & Download Helpers
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+
   // Download PDF / Printable Executive Summary Report
   const handleDownloadReport = () => {
-    onShowToast('Generating Executive Portfolio & Valuation PDF Report...', 'info');
+    setIsReportModalOpen(true);
+    onShowToast('Opened Executive Portfolio Valuation Report Modal', 'info');
+  };
 
+  const handlePrintReport = () => {
+    window.print();
+  };
+
+  const handleDownloadReportHtml = () => {
     const totalCurrent = projects.reduce((sum, p) => sum + (p.currentValuation || 0), 0);
     const totalImproved = projects.reduce((sum, p) => sum + (p.improvedValuation || 0), 0);
     const totalGain = totalImproved - totalCurrent;
@@ -590,12 +711,6 @@ export const ProjectDashboardTab: React.FC<ProjectDashboardTabProps> = ({ onShow
       month: 'long',
       day: 'numeric',
     });
-
-    const reportWindow = window.open('', '_blank');
-    if (!reportWindow) {
-      onShowToast('Please allow popups to download/print the PDF report', 'warning');
-      return;
-    }
 
     const rowsHtml = projects
       .map(
@@ -618,108 +733,153 @@ export const ProjectDashboardTab: React.FC<ProjectDashboardTabProps> = ({ onShow
       )
       .join('');
 
-    reportWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Resonance Audio Labs - Executive Portfolio Audit & ROI Growth Report</title>
-        <style>
-          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; padding: 30px; margin: 0; background: #ffffff; }
-          .header { border-bottom: 3px solid #4f46e5; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
-          .title { font-size: 22px; font-weight: 800; color: #0f172a; margin: 0; }
-          .subtitle { font-size: 12px; color: #64748b; margin-top: 4px; }
-          .meta { text-align: right; font-size: 11px; color: #64748b; font-family: monospace; }
-          .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
-          .kpi-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; }
-          .kpi-label { font-size: 10px; font-weight: bold; text-transform: uppercase; color: #64748b; font-family: monospace; }
-          .kpi-val { font-size: 20px; font-weight: 800; margin-top: 5px; font-family: monospace; }
-          table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
-          th { background: #0f172a; color: #ffffff; text-align: left; padding: 8px; font-size: 11px; font-family: monospace; text-transform: uppercase; }
-          .section-title { font-size: 14px; font-weight: 700; color: #0f172a; margin-top: 20px; margin-bottom: 10px; border-left: 4px solid #4f46e5; padding-left: 8px; }
-          .roadmap-list { font-size: 11px; line-height: 1.6; color: #334155; }
-          .roadmap-list li { margin-bottom: 6px; }
-          @media print {
-            body { padding: 0; }
-            .no-print { display: none; }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="no-print" style="margin-bottom: 15px; text-align: right;">
-          <button onclick="window.print()" style="background: #4f46e5; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">
-            🖨️ Print / Save as PDF
-          </button>
-        </div>
+    const htmlDoc = `<!DOCTYPE html>
+<html>
+<head>
+  <title>Resonance Audio Labs - Executive Portfolio Audit & ROI Growth Report</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; padding: 30px; margin: 0; background: #ffffff; }
+    .header { border-bottom: 3px solid #4f46e5; padding-bottom: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
+    .title { font-size: 22px; font-weight: 800; color: #0f172a; margin: 0; }
+    .subtitle { font-size: 12px; color: #64748b; margin-top: 4px; }
+    .meta { text-align: right; font-size: 11px; color: #64748b; font-family: monospace; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
+    .kpi-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; }
+    .kpi-label { font-size: 10px; font-weight: bold; text-transform: uppercase; color: #64748b; font-family: monospace; }
+    .kpi-val { font-size: 20px; font-weight: 800; margin-top: 5px; font-family: monospace; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
+    th { background: #0f172a; color: #ffffff; text-align: left; padding: 8px; font-size: 11px; font-family: monospace; text-transform: uppercase; }
+    .section-title { font-size: 14px; font-weight: 700; color: #0f172a; margin-top: 20px; margin-bottom: 10px; border-left: 4px solid #4f46e5; padding-left: 8px; }
+    .roadmap-list { font-size: 11px; line-height: 1.6; color: #334155; }
+    .roadmap-list li { margin-bottom: 6px; }
+    @media print {
+      body { padding: 0; }
+      .no-print { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print" style="margin-bottom: 15px; text-align: right;">
+    <button onclick="window.print()" style="background: #4f46e5; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">
+      🖨️ Print / Save as PDF
+    </button>
+  </div>
 
-        <div class="header">
-          <div>
-            <h1 class="title">RESONANCE AUDIO LABS</h1>
-            <div class="subtitle">Executive Multi-Platform Project Portfolio Audit & Valuation ROI Report</div>
-          </div>
-          <div class="meta">
-            <div><strong>Report Date:</strong> ${currentDate}</div>
-            <div><strong>Accounts:</strong> chris.james378@gmail.com | resonanceaudiolabs@gmail.com</div>
-            <div><strong>Domain:</strong> uniagent.website</div>
-          </div>
-        </div>
+  <div class="header">
+    <div>
+      <h1 class="title">RESONANCE AUDIO LABS</h1>
+      <div class="subtitle">Executive Multi-Platform Project Portfolio Audit & Valuation ROI Report</div>
+    </div>
+    <div class="meta">
+      <div><strong>Report Date:</strong> ${currentDate}</div>
+      <div><strong>Accounts:</strong> chris.james378@gmail.com | resonanceaudiolabs@gmail.com</div>
+      <div><strong>Domain:</strong> uniagent.website</div>
+    </div>
+  </div>
 
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-label">Current Baseline Portfolio Asset Value</div>
-            <div class="kpi-val" style="color: #0f172a;">$${totalCurrent.toLocaleString()} USD</div>
-          </div>
-          <div class="kpi-card" style="background: #f0fdf4; border-color: #bbf7d0;">
-            <div class="kpi-label" style="color: #166534;">Target Improved Portfolio Valuation</div>
-            <div class="kpi-val" style="color: #15803d;">$${totalImproved.toLocaleString()} USD</div>
-          </div>
-          <div class="kpi-card" style="background: #eef2ff; border-color: #c7d2fe;">
-            <div class="kpi-label" style="color: #3730a3;">Net Projected Growth Upside</div>
-            <div class="kpi-val" style="color: #4338ca;">+$${totalGain.toLocaleString()} (+${growthPct}%)</div>
-          </div>
-        </div>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Current Baseline Portfolio Asset Value</div>
+      <div class="kpi-val" style="color: #0f172a;">$${totalCurrent.toLocaleString()} USD</div>
+    </div>
+    <div class="kpi-card" style="background: #f0fdf4; border-color: #bbf7d0;">
+      <div class="kpi-label" style="color: #166534;">Target Improved Portfolio Valuation</div>
+      <div class="kpi-val" style="color: #15803d;">$${totalImproved.toLocaleString()} USD</div>
+    </div>
+    <div class="kpi-card" style="background: #eef2ff; border-color: #c7d2fe;">
+      <div class="kpi-label" style="color: #3730a3;">Net Projected Growth Upside</div>
+      <div class="kpi-val" style="color: #4338ca;">+$${totalGain.toLocaleString()} (+${growthPct}%)</div>
+    </div>
+  </div>
 
-        <div class="section-title">Ecosystem Projects Financial Breakdown (${projects.length} Active Builds)</div>
-        <table>
-          <thead>
-            <tr>
-              <th>Project Name</th>
-              <th>Category</th>
-              <th>Source</th>
-              <th>Status</th>
-              <th style="text-align: right;">Current ($)</th>
-              <th style="text-align: right;">Improved ($)</th>
-              <th style="text-align: right;">Net Delta ($)</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rowsHtml}
-          </tbody>
-        </table>
+  <div class="section-title">Ecosystem Projects Financial Breakdown (${projects.length} Active Builds)</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Project Name</th>
+        <th>Category</th>
+        <th>Source</th>
+        <th>Status</th>
+        <th style="text-align: right;">Current ($)</th>
+        <th style="text-align: right;">Improved ($)</th>
+        <th style="text-align: right;">Net Delta ($)</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rowsHtml}
+    </tbody>
+  </table>
 
-        <div class="section-title">Strategic Technical Advancement Roadmap (Recommended Next Steps)</div>
-        <ul class="roadmap-list">
-          <li><strong>1. WebGPU Latent Sound Morphing:</strong> Accelerate DSP shader rendering for <i>Rippler-X 101 AI Neural Synth</i> to enable zero-latency 3D neural sound synthesis.</li>
-          <li><strong>2. VST3/AU Desktop Wrappers:</strong> Compile Web Audio DSP cores (<i>PolyBLEP Core</i>, <i>Resonant Pulse Calibration</i>) into native desktop plugin binaries for Ableton Live, Logic Pro, and Pro Tools.</li>
-          <li><strong>3. Stripe Auto-Recurring Subscription Billing:</strong> Implement automated SaaS tiers on <i>uniagent.website</i> and <i>Resonance Client Portal</i> for recurring API keys and license renewals.</li>
-          <li><strong>4. Real-Time WebRTC Collaborative Audio:</strong> Upgrade the <i>32-Step DAW Sequencer</i> with multi-user jam room WebRTC audio streaming.</li>
-          <li><strong>5. Native iOS / Android Mobile PWA Release:</strong> Package the <i>Mobile Field Recorder PWA</i> using Capacitor for App Store & Google Play distribution.</li>
-        </ul>
+  <div class="section-title">Strategic Technical Advancement Roadmap (Recommended Next Steps)</div>
+  <ul class="roadmap-list">
+    <li><strong>1. Project Conveyor AMOC Sentinel Scaling:</strong> Fabricate 100-buoy SaliBuoy swarm array with Grade 5 Titanium pressure vessels, secure $600k Callaghan 40% rebate, and execute offshore downwelling proving trials.</li>
+    <li><strong>2. WebGPU Latent Sound Morphing:</strong> Accelerate DSP shader rendering for Rippler-X 101 AI Neural Synth to enable zero-latency 3D neural sound synthesis.</li>
+    <li><strong>3. VST3/AU Desktop Wrappers:</strong> Compile Web Audio DSP cores into native desktop plugin binaries for Ableton Live, Logic Pro, and Pro Tools.</li>
+    <li><strong>4. Stripe Auto-Recurring Subscription Billing:</strong> Implement automated SaaS tiers on uniagent.website and Resonance Client Portal for recurring API keys and license renewals.</li>
+    <li><strong>5. Real-Time WebRTC Collaborative Audio:</strong> Upgrade the 32-Step DAW Sequencer with multi-user jam room WebRTC audio streaming.</li>
+  </ul>
 
-        <div style="margin-top: 30px; border-top: 1px solid #e2e8f0; pt-10; text-align: center; font-size: 10px; color: #94a3b8;">
-          Report generated automatically by Resonance Studio Operations Hub • Confidential Internal Investor Document
-        </div>
+  <div style="margin-top: 30px; border-top: 1px solid #e2e8f0; pt-10; text-align: center; font-size: 10px; color: #94a3b8;">
+    Report generated automatically by Resonance Studio Operations Hub • Confidential Internal Investor Document
+  </div>
+</body>
+</html>`;
 
-        <script>
-          window.onload = function() {
-            setTimeout(function() {
-              window.print();
-            }, 600);
-          };
-        </script>
-      </body>
-      </html>
-    `);
-    reportWindow.document.close();
+    const blob = new Blob([htmlDoc], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Resonance_Executive_Portfolio_Report_${new Date().toISOString().split('T')[0]}.html`;
+    link.click();
+    URL.revokeObjectURL(url);
+    onShowToast('Downloaded Executive Portfolio Report (.html)', 'success');
+  };
+
+  const handleDownloadReportText = () => {
+    const totalCurrent = projects.reduce((sum, p) => sum + (p.currentValuation || 0), 0);
+    const totalImproved = projects.reduce((sum, p) => sum + (p.improvedValuation || 0), 0);
+    const totalGain = totalImproved - totalCurrent;
+
+    let text = `================================================================================
+RESONANCE AUDIO LABS | EXECUTIVE PORTFOLIO AUDIT & VALUATION ROI REPORT
+================================================================================
+Generated Date: ${new Date().toISOString().split('T')[0]}
+Total Projects Tracked: ${projects.length}
+Accounts: chris.james378@gmail.com | resonanceaudiolabs@gmail.com | uniagent.website
+
+PORTFOLIO VALUATION SUMMARY:
+- Current Baseline Asset Value:   $${totalCurrent.toLocaleString()} USD
+- Target Improved Valuation:      $${totalImproved.toLocaleString()} USD
+- Net Projected Value Growth:     +$${totalGain.toLocaleString()} USD (+${((totalGain / totalCurrent) * 100).toFixed(1)}%)
+
+FLAGSHIP #1 ASSET:
+Project Conveyor | SaliBuoy Systems AMOC Stabilization
+- Platform: Vercel (https://project-conveyor-hub.vercel.app/)
+- Seed Valuation Ask: $1,500,000 USD / NZD ($600k Callaghan 40% Rebate)
+- Target 100-Buoy Swarm Valuation: $18,500,000 USD
+- Milestone: 90-day Hauraki Gulf & Southern Ocean downwelling proof
+
+PROJECTS BREAKDOWN:
+`;
+
+    projects.forEach((p, idx) => {
+      text += `\n${idx + 1}. ${p.title} [${p.category.toUpperCase()} | ${p.platform}]
+   Status: ${p.status} | Health: ${p.healthStatus || 'On Track'}
+   Valuation: $${p.currentValuation.toLocaleString()} -> $${p.improvedValuation.toLocaleString()} (+$${(p.improvedValuation - p.currentValuation).toLocaleString()})
+   Strategy: ${p.improvementStrategy}
+`;
+    });
+
+    text += `\n================================================================================\n`;
+
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Resonance_Portfolio_Valuation_Summary_${new Date().toISOString().split('T')[0]}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+    onShowToast('Downloaded Executive Portfolio Summary (.txt)', 'success');
   };
 
   // New Project Form Modal
@@ -2005,6 +2165,197 @@ export const ProjectDashboardTab: React.FC<ProjectDashboardTabProps> = ({ onShow
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Executive Portfolio Valuation Report Modal */}
+      {isReportModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-fade-in">
+          <div className="bg-slate-900 border border-indigo-500/40 rounded-2xl max-w-5xl w-full max-h-[92vh] overflow-y-auto p-6 sm:p-8 space-y-6 shadow-2xl relative my-auto">
+            {/* Modal Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-5">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono font-bold uppercase">
+                    CONFIDENTIAL INVESTOR PROSPECTUS
+                  </span>
+                  <span className="text-xs text-slate-400 font-mono">
+                    {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  </span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                  Executive Portfolio Audit & Valuation ROI Report
+                </h2>
+                <p className="text-xs text-slate-400 font-mono mt-0.5">
+                  Accounts: chris.james378@gmail.com | resonanceaudiolabs@gmail.com | uniagent.website
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={handlePrintReport}
+                  className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold font-mono flex items-center gap-1.5 transition-all shadow-md shadow-indigo-600/30 cursor-pointer"
+                  title="Print or Save as PDF"
+                >
+                  <i className="fas fa-print"></i> Print / PDF
+                </button>
+
+                <button
+                  onClick={handleDownloadReportHtml}
+                  className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-mono font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
+                  title="Download full standalone styled HTML report"
+                >
+                  <i className="fas fa-file-code text-cyan-400"></i> HTML Report
+                </button>
+
+                <button
+                  onClick={handleDownloadReportText}
+                  className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-mono font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
+                  title="Download plain text valuation summary"
+                >
+                  <i className="fas fa-file-lines text-emerald-400"></i> Summary (.txt)
+                </button>
+
+                <button
+                  onClick={() => setIsReportModalOpen(false)}
+                  className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-all cursor-pointer ml-1"
+                >
+                  <i className="fas fa-times text-sm"></i>
+                </button>
+              </div>
+            </div>
+
+            {/* Financial KPI Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono">
+              <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-1">
+                <span className="text-[10px] uppercase text-slate-400 tracking-wider">Current Combined Asset Value</span>
+                <p className="text-2xl font-extrabold text-white">
+                  ${projects.reduce((sum, p) => sum + (p.currentValuation || 0), 0).toLocaleString()} <span className="text-xs text-slate-400 font-normal">USD</span>
+                </p>
+                <p className="text-[10px] text-slate-500">Current baseline valuation across {projects.length} assets</p>
+              </div>
+
+              <div className="bg-slate-950 p-4 rounded-xl border border-emerald-500/30 space-y-1">
+                <span className="text-[10px] uppercase text-emerald-400 tracking-wider font-bold">Target Improved Portfolio Valuation</span>
+                <p className="text-2xl font-extrabold text-emerald-400">
+                  ${projects.reduce((sum, p) => sum + (p.improvedValuation || 0), 0).toLocaleString()} <span className="text-xs text-emerald-300/70 font-normal">USD</span>
+                </p>
+                <p className="text-[10px] text-emerald-400/70 font-mono">If improved with hardware/AI monetization</p>
+              </div>
+
+              <div className="bg-slate-950 p-4 rounded-xl border border-indigo-500/30 space-y-1">
+                <span className="text-[10px] uppercase text-indigo-400 tracking-wider font-bold">Net Portfolio Value Gain</span>
+                <p className="text-2xl font-extrabold text-indigo-300">
+                  +${(projects.reduce((sum, p) => sum + (p.improvedValuation || 0), 0) - projects.reduce((sum, p) => sum + (p.currentValuation || 0), 0)).toLocaleString()} <span className="text-xs text-indigo-400/70 font-normal">USD</span>
+                </p>
+                <p className="text-[10px] text-indigo-300 font-mono">
+                  +{projects.reduce((sum, p) => sum + (p.currentValuation || 0), 0) > 0 ? (((projects.reduce((sum, p) => sum + (p.improvedValuation || 0), 0) - projects.reduce((sum, p) => sum + (p.currentValuation || 0), 0)) / projects.reduce((sum, p) => sum + (p.currentValuation || 0), 0)) * 100).toFixed(1) : 0}% Projected Upside
+                </p>
+              </div>
+            </div>
+
+            {/* Flagship Priority Asset Card */}
+            <div className="p-5 rounded-xl bg-gradient-to-r from-cyan-950/40 via-slate-950 to-indigo-950/40 border border-cyan-500/40 space-y-3">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[10px] font-mono font-bold flex items-center gap-1">
+                    <i className="fas fa-crown text-amber-400"></i>
+                    #1 PRIORITY FLAGSHIP PROJECT
+                  </span>
+                  <span className="text-xs font-mono text-slate-300 font-bold">Project Conveyor | SaliBuoy Systems</span>
+                </div>
+                <div className="text-right font-mono text-xs">
+                  <span className="text-slate-400">Baseline Ask: </span>
+                  <span className="text-white font-bold">$1.5M NZD</span>
+                  <span className="text-slate-500 mx-1.5">→</span>
+                  <span className="text-emerald-400 font-bold">$18.5M Target Swarm</span>
+                </div>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                Autonomous subsurface oceanographic buoy arrays restoring natural thermohaline downwelling in the North Atlantic and Southern Ocean to halt AMOC collapse by 2040–2050. DeepTech incubation at Outset Ventures (Pukekohe, Auckland) with Callaghan Innovation 40% non-dilutive R&D rebate ($600k NZD).
+              </p>
+            </div>
+
+            {/* Complete Projects Breakdown Table */}
+            <div className="space-y-3">
+              <h3 className="text-xs font-mono text-slate-400 uppercase font-bold tracking-wider flex items-center justify-between">
+                <span>Ecosystem Projects Financial Breakdown ({projects.length} Active Builds)</span>
+                <span className="text-[10px] text-slate-500">All values in USD/NZD Equivalent</span>
+              </h3>
+
+              <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950">
+                <table className="w-full text-left text-xs font-mono">
+                  <thead>
+                    <tr className="border-b border-slate-800 text-slate-400 bg-slate-900/80">
+                      <th className="p-3">#</th>
+                      <th className="p-3">Project Title</th>
+                      <th className="p-3">Category</th>
+                      <th className="p-3">Platform</th>
+                      <th className="p-3 text-right">Baseline ($)</th>
+                      <th className="p-3 text-right">Target ($)</th>
+                      <th className="p-3 text-right">Net Gain ($)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60">
+                    {projects.map((p, idx) => (
+                      <React.Fragment key={p.id}>
+                        <tr className="hover:bg-slate-900/40">
+                          <td className="p-3 text-slate-500">{idx + 1}</td>
+                          <td className="p-3 font-bold text-white max-w-xs truncate">{p.title}</td>
+                          <td className="p-3 uppercase text-cyan-400 text-[10px]">{p.category}</td>
+                          <td className="p-3 text-slate-300 text-[10px]">{p.platform}</td>
+                          <td className="p-3 text-right text-slate-300 font-bold">${p.currentValuation.toLocaleString()}</td>
+                          <td className="p-3 text-right text-emerald-400 font-bold">${p.improvedValuation.toLocaleString()}</td>
+                          <td className="p-3 text-right text-indigo-300 font-bold">+${(p.improvedValuation - p.currentValuation).toLocaleString()}</td>
+                        </tr>
+                        <tr className="bg-slate-900/20 text-[10px] text-slate-400 border-b border-slate-800/40">
+                          <td colSpan={7} className="px-3 py-1.5 italic">
+                            <span className="text-slate-500 font-semibold font-mono">Improvement Strategy: </span>
+                            {p.improvementStrategy}
+                          </td>
+                        </tr>
+                      </React.Fragment>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Strategic Technical Roadmap */}
+            <div className="p-5 rounded-xl bg-slate-950 border border-slate-800 space-y-2.5 text-xs">
+              <h4 className="font-mono text-cyan-400 uppercase font-bold text-xs">Strategic Technical Advancement Roadmap</h4>
+              <ul className="space-y-1.5 text-slate-300 leading-relaxed text-[11px]">
+                <li className="flex items-start gap-2">
+                  <span className="text-cyan-400 font-bold">1.</span>
+                  <span><strong>Project Conveyor AMOC Swarm Scaling:</strong> Fabricate 100-buoy SaliBuoy Mark-III array with Grade 5 Titanium hulls, secure $600k Callaghan 40% rebate, and execute Hauraki Gulf sea trials.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-cyan-400 font-bold">2.</span>
+                  <span><strong>WebGPU Latent Sound Morphing:</strong> Accelerate DSP shader rendering for Rippler-X 101 AI Neural Synth for zero-latency 3D neural sound synthesis.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-cyan-400 font-bold">3.</span>
+                  <span><strong>VST3/AU Desktop Wrappers:</strong> Compile Web Audio DSP cores into native desktop plugin binaries for Ableton Live, Logic Pro, and Pro Tools.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-cyan-400 font-bold">4.</span>
+                  <span><strong>Stripe Auto-Recurring Subscription Billing:</strong> Implement automated SaaS tiers on uniagent.website and Resonance Client Portal for recurring license renewals.</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex justify-between items-center pt-4 border-t border-slate-800 text-xs font-mono text-slate-500">
+              <span>Confidential Internal Document • Resonance Studio Operations Hub</span>
+              <button
+                onClick={() => setIsReportModalOpen(false)}
+                className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold transition-all cursor-pointer"
+              >
+                Close Report
+              </button>
+            </div>
           </div>
         </div>
       )}

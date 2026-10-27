@@ -183,6 +183,30 @@ export const LandingTab: React.FC<LandingTabProps> = ({ onNavigate }) => {
                 agentic-sound-labs.run.app
               </a>
             </div>
+            <div className="bg-slate-950 p-3.5 rounded-xl border border-purple-500/30 bg-purple-950/20 space-y-1">
+              <span className="text-purple-400 text-[10px] uppercase font-semibold">PWA Synth App Builder</span>
+              <a
+                href="https://synth-horizons-gen-pwa-app-builder.ai.studio"
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs font-bold text-purple-300 hover:text-white truncate block transition-colors flex items-center gap-1"
+              >
+                <span>synth-horizons-pwa</span>
+                <i className="fas fa-external-link-alt text-[9px]"></i>
+              </a>
+            </div>
+            <div className="bg-slate-950 p-3.5 rounded-xl border border-cyan-500/30 bg-cyan-950/20 space-y-1">
+              <span className="text-cyan-400 text-[10px] uppercase font-semibold">Quantum AI Album Studio</span>
+              <a
+                href="https://altamonte-205-quantum-ai-synth-album-studio.ai.studio"
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs font-bold text-cyan-300 hover:text-white truncate block transition-colors flex items-center gap-1"
+              >
+                <span>altamonte-205</span>
+                <i className="fas fa-external-link-alt text-[9px]"></i>
+              </a>
+            </div>
             <div className="bg-slate-950 p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-950/20 space-y-1">
               <span className="text-emerald-400 text-[10px] uppercase font-semibold">Sonorus Melodious v12.3</span>
               <a
@@ -192,6 +216,18 @@ export const LandingTab: React.FC<LandingTabProps> = ({ onNavigate }) => {
                 className="text-xs font-bold text-emerald-300 hover:text-white truncate block transition-colors flex items-center gap-1"
               >
                 <span>sonorus-melodious-v12-3</span>
+                <i className="fas fa-external-link-alt text-[9px]"></i>
+              </a>
+            </div>
+            <div className="bg-slate-950 p-3.5 rounded-xl border border-amber-500/30 bg-amber-950/20 space-y-1">
+              <span className="text-amber-400 text-[10px] uppercase font-semibold">Universal AI Shopping Agent</span>
+              <a
+                href="https://universal-ai-shopping-agent.ai.studio"
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs font-bold text-amber-300 hover:text-white truncate block transition-colors flex items-center gap-1"
+              >
+                <span>universal-ai-shopping-agent</span>
                 <i className="fas fa-external-link-alt text-[9px]"></i>
               </a>
             </div>
@@ -208,7 +244,14 @@ export const LandingTab: React.FC<LandingTabProps> = ({ onNavigate }) => {
             </div>
             <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1">
               <span className="text-slate-500 text-[10px] uppercase">Target Domain</span>
-              <div className="text-xs font-bold text-emerald-400 truncate">uniagant.website</div>
+              <a
+                href="https://universal-ai-shopping-agent.ai.studio"
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs font-bold text-emerald-400 hover:underline block truncate"
+              >
+                uniagant.website
+              </a>
             </div>
           </div>
         </div>

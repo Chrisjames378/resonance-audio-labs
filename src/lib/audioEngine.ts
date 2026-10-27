@@ -71,6 +71,13 @@ class AudioEngine {
     return this.audioCtx;
   }
 
+  public getAnalyser(): AnalyserNode | null {
+    if (!this.analyser) {
+      this.ensureAudioContext();
+    }
+    return this.analyser;
+  }
+
   public ensureAudioContext(): AudioContext | null {
     if (!this.audioCtx) {
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;

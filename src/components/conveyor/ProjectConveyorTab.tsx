@@ -94,6 +94,21 @@ SaliBuoy Systems builds wind-powered, autonomous subsurface oceanographic buoys:
     onShowToast('Downloaded SaliBuoy Systems Executive One-Pager', 'success');
   };
 
+  const handleDownloadPitchDeck = () => {
+    const md = CONVEYOR_PITCH_SLIDES.map(
+      (s) => `# Slide ${s.id}: ${s.title}\n**Subtitle:** ${s.subtitle}\n**Metric:** ${s.highlightMetric.value} (${s.highlightMetric.label})\n\n${s.bulletPoints.map((b) => `- ${b}`).join('\n')}\n\n> Takeaway: ${s.calloutNote}\n\n---\n`
+    ).join('\n');
+
+    const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'SaliBuoy_Systems_VC_Pitch_Deck.md';
+    link.click();
+    URL.revokeObjectURL(url);
+    onShowToast('Downloaded SaliBuoy Systems VC Pitch Deck (.md)', 'success');
+  };
+
   return (
     <div className="space-y-6">
       {/* Top Banner with Direct Vercel Link & Mission Priority */}
@@ -121,23 +136,33 @@ SaliBuoy Systems builds wind-powered, autonomous subsurface oceanographic buoys:
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5">
             <a
               href="https://project-conveyor-hub.vercel.app/"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-lg shadow-cyan-600/30 transform hover:-translate-y-0.5 cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white font-bold text-xs flex items-center gap-2 transition-all shadow-lg shadow-cyan-600/30 transform hover:-translate-y-0.5 cursor-pointer"
             >
               <i className="fas fa-external-link-alt"></i>
-              Open Live App (vercel.app)
+              Live Vercel Hub
             </a>
 
             <button
               onClick={handleDownloadExecutiveOnePager}
-              className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs flex items-center gap-2 transition-all"
+              className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+              title="Download Executive One-Pager summary"
             >
-              <i className="fas fa-download text-cyan-400"></i>
+              <i className="fas fa-file-lines text-cyan-400"></i>
               Executive 1-Pager (.txt)
+            </button>
+
+            <button
+              onClick={handleDownloadPitchDeck}
+              className="px-3.5 py-2 rounded-xl bg-indigo-900/60 hover:bg-indigo-800/80 text-indigo-200 border border-indigo-500/40 font-semibold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+              title="Download 7-Slide VC Pitch Deck in Markdown"
+            >
+              <i className="fas fa-file-code text-indigo-400"></i>
+              VC Pitch Deck (.md)
             </button>
           </div>
         </div>
@@ -399,21 +424,35 @@ const ConveyorSystemDynamicsView: React.FC = () => {
   const [injectionVol, setInjectionVol] = useState(8.5);
   const [deployYear, setDeployYear] = useState(2028);
   const [freshwaterMultiplier, setFreshwaterMultiplier] = useState(1.2);
+  const [pumpRateLpm, setPumpRateLpm] = useState(420);
+  const [selectedBathymetry, setSelectedBathymetry] = useState<'irminger' | 'labrador' | 'cape-reinga' | 'campbell' | 'hauraki'>('irminger');
+
+  const bathymetryInfo = {
+    irminger: { name: 'North Atlantic Irminger Sea Gyre', depth: 1500, baselineSvBase: 17.8, densityBonus: 1.08, desc: 'Primary Arctic downwelling gateway south of Greenland.' },
+    labrador: { name: 'Labrador Sea Deep Basin', depth: 2200, baselineSvBase: 17.2, densityBonus: 1.12, desc: 'Critical North Atlantic Deep Water (NADW) formation trench.' },
+    'cape-reinga': { name: 'Cape Reinga Marine Trench (NZ)', depth: 350, baselineSvBase: 16.5, densityBonus: 1.02, desc: 'High-current tidal boundary off the northern tip of New Zealand.' },
+    campbell: { name: 'Campbell Plateau Sub-Antarctic (NZ)', depth: 800, baselineSvBase: 16.8, densityBonus: 1.05, desc: 'Antarctic Bottom Water (AABW) cold conveyor convergence zone.' },
+    hauraki: { name: 'Hauraki Gulf Outer Shelf (NZ)', depth: 120, baselineSvBase: 16.0, densityBonus: 0.95, desc: 'Shallow protected proving ground for Mark-II buoy trials.' },
+  };
+
+  const currentZone = bathymetryInfo[selectedBathymetry];
 
   const simulationData = useMemo(() => {
     const data = [];
+    const pumpScaling = (pumpRateLpm / 420);
+
     for (let yr = 2026; yr <= 2076; yr++) {
       const idx = yr - 2026;
       const progress = idx / 50;
 
       // Meltwater degradation
       const meltImpact = Math.pow(progress, 1.4) * 11.2 * freshwaterMultiplier;
-      const baselineSv = Math.max(5.2, 17.8 - meltImpact - (yr > 2042 ? (yr - 2042) * 0.12 : 0));
+      const baselineSv = Math.max(5.2, currentZone.baselineSvBase - meltImpact - (yr > 2042 ? (yr - 2042) * 0.12 : 0));
 
       // SaliBuoy Custom Intervention
       const ramp = yr >= deployYear ? Math.min(1, (yr - deployYear) / 6) : 0;
-      const scaling = (fleetSize / 250) * (injectionVol / 8.5) * 8.4;
-      const customSv = Math.min(19.0, Math.max(baselineSv, baselineSv + ramp * scaling));
+      const scaling = (fleetSize / 250) * (injectionVol / 8.5) * pumpScaling * 8.4 * currentZone.densityBonus;
+      const customSv = Math.min(19.2, Math.max(baselineSv, baselineSv + ramp * scaling));
 
       // Moderate (100 buoys) & Geoscale (1,000 buoys)
       const moderateRamp = yr >= 2029 ? Math.min(1, (yr - 2029) / 8) : 0;
@@ -428,17 +467,21 @@ const ConveyorSystemDynamicsView: React.FC = () => {
         customSv: Number(customSv.toFixed(2)),
         moderateSv: Number(moderateSv.toFixed(2)),
         geoscaleSv: Number(geoscaleSv.toFixed(2)),
+        criticalThreshold: 10.0,
       });
     }
     return data;
-  }, [fleetSize, injectionVol, deployYear, freshwaterMultiplier]);
+  }, [fleetSize, injectionVol, deployYear, freshwaterMultiplier, pumpRateLpm, selectedBathymetry, currentZone]);
 
   const latest2076 = simulationData[simulationData.length - 1];
+  const collapseYear = simulationData.find((d) => d.baselineSv < 10.0)?.year || 2041;
+  const heatTransportBaselinePW = ((latest2076.baselineSv / 17.8) * 1.65).toFixed(2);
+  const heatTransportCustomPW = ((latest2076.customSv / 17.8) * 1.65).toFixed(2);
 
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Simulation Controls */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
           <div>
             <span className="text-xs font-mono text-cyan-400 uppercase font-semibold">Climate Dynamics Engine</span>
@@ -449,6 +492,33 @@ const ConveyorSystemDynamicsView: React.FC = () => {
               1 Sverdrup (Sv) = 1,000,000 m³/s
             </span>
           </div>
+        </div>
+
+        {/* Bathymetry Zone Selector */}
+        <div className="space-y-2">
+          <label className="text-xs font-mono text-slate-400 flex items-center justify-between">
+            <span>Target Bathymetric Zone & Ocean Basin:</span>
+            <span className="text-cyan-400 font-bold">{currentZone.name} (-{currentZone.depth}m)</span>
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+            {(['irminger', 'labrador', 'cape-reinga', 'campbell', 'hauraki'] as const).map((zoneKey) => (
+              <button
+                key={zoneKey}
+                onClick={() => setSelectedBathymetry(zoneKey)}
+                className={`p-2.5 rounded-xl border text-left text-xs font-mono transition-all cursor-pointer ${
+                  selectedBathymetry === zoneKey
+                    ? 'bg-cyan-950/40 border-cyan-500 text-cyan-300 font-bold shadow-md shadow-cyan-950/50'
+                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                }`}
+              >
+                <div className="truncate">{bathymetryInfo[zoneKey].name.split(' (')[0]}</div>
+                <div className="text-[10px] text-slate-500">-{bathymetryInfo[zoneKey].depth}m Depth</div>
+              </button>
+            ))}
+          </div>
+          <p className="text-[11px] text-slate-400 font-mono italic">
+            ℹ️ {currentZone.desc} (Salinity density multiplier: {currentZone.densityBonus}x)
+          </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-2">
@@ -514,33 +584,85 @@ const ConveyorSystemDynamicsView: React.FC = () => {
 
           <div className="space-y-2">
             <div className="flex justify-between text-xs font-mono">
-              <span className="text-slate-400">Greenland Melt Acceleration</span>
-              <span className="text-rose-400 font-bold">{freshwaterMultiplier}x</span>
+              <span className="text-slate-400">Pump Flow (L/min)</span>
+              <span className="text-amber-400 font-bold">{pumpRateLpm} L/min</span>
             </div>
             <input
               type="range"
-              min="0.8"
-              max="2.5"
-              step="0.1"
-              value={freshwaterMultiplier}
-              onChange={(e) => setFreshwaterMultiplier(Number(e.target.value))}
-              className="w-full accent-rose-500"
+              min="100"
+              max="2500"
+              step="50"
+              value={pumpRateLpm}
+              onChange={(e) => setPumpRateLpm(Number(e.target.value))}
+              className="w-full accent-amber-500"
             />
             <div className="text-[10px] text-slate-500 flex justify-between">
-              <span>0.8x Moderate</span>
-              <span>2.5x Severe</span>
+              <span>100 L/min</span>
+              <span>2,500 L/min</span>
             </div>
           </div>
+        </div>
+
+        <div className="space-y-2 pt-2 border-t border-slate-800">
+          <div className="flex justify-between text-xs font-mono">
+            <span className="text-slate-400">Greenland Freshwater Meltwater Dilution Factor</span>
+            <span className="text-rose-400 font-bold">{freshwaterMultiplier}x Acceleration</span>
+          </div>
+          <input
+            type="range"
+            min="0.8"
+            max="3.0"
+            step="0.1"
+            value={freshwaterMultiplier}
+            onChange={(e) => setFreshwaterMultiplier(Number(e.target.value))}
+            className="w-full accent-rose-500"
+          />
+          <div className="text-[10px] text-slate-500 flex justify-between">
+            <span>0.8x Moderate Melt</span>
+            <span>1.5x IPCC High Melt</span>
+            <span>3.0x Runaway Glacial Collapse</span>
+          </div>
+        </div>
+      </div>
+
+      {/* AMOC Collapse Warning & Summary Metrics */}
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div className="p-4 rounded-xl bg-slate-900 border border-rose-500/30 font-mono space-y-1">
+          <span className="text-[10px] text-rose-400 font-bold uppercase">Unmitigated AMOC Collapse</span>
+          <div className="text-xl font-bold text-rose-400">Year ~{collapseYear}</div>
+          <div className="text-[10px] text-slate-400">Drops under critical 10.0 Sv threshold</div>
+        </div>
+
+        <div className="p-4 rounded-xl bg-slate-900 border border-cyan-500/30 font-mono space-y-1">
+          <span className="text-[10px] text-cyan-400 font-bold uppercase">SaliBuoy Stabilized Flow</span>
+          <div className="text-xl font-bold text-cyan-300">{latest2076.customSv} Sv</div>
+          <div className="text-[10px] text-emerald-400 font-bold">+{((latest2076.customSv - latest2076.baselineSv)).toFixed(1)} Sv Over Baseline</div>
+        </div>
+
+        <div className="p-4 rounded-xl bg-slate-900 border border-indigo-500/30 font-mono space-y-1">
+          <span className="text-[10px] text-indigo-400 font-bold uppercase">Ocean Heat Transport</span>
+          <div className="text-xl font-bold text-indigo-300">{heatTransportCustomPW} PW</div>
+          <div className="text-[10px] text-slate-400">vs {heatTransportBaselinePW} PW collapsed baseline</div>
+        </div>
+
+        <div className="p-4 rounded-xl bg-slate-900 border border-emerald-500/30 font-mono space-y-1">
+          <span className="text-[10px] text-emerald-400 font-bold uppercase">European Winter Buffer</span>
+          <div className="text-xl font-bold text-emerald-300">+3.8°C Saved</div>
+          <div className="text-[10px] text-slate-400">Prevents catastrophic deep freeze</div>
         </div>
       </div>
 
       {/* Recharts Visualization */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div className="text-xs font-mono text-slate-400">
-            Year 2076 Predicted Flow: <span className="text-rose-400 font-bold">{latest2076.baselineSv} Sv (Collapse)</span> vs{' '}
-            <span className="text-cyan-400 font-bold">{latest2076.customSv} Sv (SaliBuoy Fleet)</span>
+            Year 2076 Projected AMOC Strength: <span className="text-rose-400 font-bold">{latest2076.baselineSv} Sv (Collapse)</span> vs{' '}
+            <span className="text-cyan-400 font-bold">{latest2076.customSv} Sv (SaliBuoy {fleetSize} Units)</span>
           </div>
+          <span className="text-[11px] font-mono text-rose-400 flex items-center gap-1.5">
+            <span className="w-2 h-0.5 bg-rose-500 inline-block border-b border-dashed border-rose-300"></span>
+            Critical Tipping Threshold: 10.0 Sv
+          </span>
         </div>
 
         <div className="h-80 w-full">
@@ -562,6 +684,7 @@ const ConveyorSystemDynamicsView: React.FC = () => {
               <Line type="monotone" dataKey="customSv" name={`SaliBuoy Custom Array (${fleetSize} Units)`} stroke="#06b6d4" strokeWidth={3} dot={false} />
               <Line type="monotone" dataKey="moderateSv" name="100-Buoy Baseline" stroke="#10b981" strokeWidth={1.5} strokeDasharray="4 4" dot={false} />
               <Line type="monotone" dataKey="geoscaleSv" name="1,000-Buoy Geo-Scale" stroke="#a855f7" strokeWidth={1.5} strokeDasharray="2 2" dot={false} />
+              <Line type="monotone" dataKey="criticalThreshold" name="Collapse Threshold (10 Sv)" stroke="#ef4444" strokeWidth={1.5} strokeDasharray="6 3" dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -581,6 +704,9 @@ const Conveyor3DCadView: React.FC<{ onShowToast: (m: string, t?: any) => void }>
   const [depthMeters, setDepthMeters] = useState(280);
   const [rotationAngle, setRotationAngle] = useState(45);
   const [autoRotate, setAutoRotate] = useState(true);
+  const [titaniumThicknessMm, setTitaniumThicknessMm] = useState(16);
+  const [cadPumpRateLpm, setCadPumpRateLpm] = useState(420);
+  const [selectedPartId, setSelectedPartId] = useState<string>('sub-05');
 
   // Auto rotation loop
   useEffect(() => {
@@ -590,6 +716,16 @@ const Conveyor3DCadView: React.FC<{ onShowToast: (m: string, t?: any) => void }>
     }, 40);
     return () => clearInterval(interval);
   }, [autoRotate]);
+
+  // Selected CAD Part from data
+  const selectedPart = CONVEYOR_CAD_PARTS.find((p) => p.id === selectedPartId) || CONVEYOR_CAD_PARTS[0];
+
+  // Engineering calculations
+  const yieldStrengthMpa = 880; // Grade 5 Titanium Ti-6Al-4V
+  const hullRadiusM = 0.42; // 840mm diameter outer cylinder
+  const maxAllowablePressureBar = Math.round((yieldStrengthMpa * (titaniumThicknessMm / 1000) / hullRadiusM) * 10);
+  const collapseDepthRatingM = Math.round(maxAllowablePressureBar * 10.197); // 1 Bar ~ 10.197m
+  const safetyFactorAtDepth = (collapseDepthRatingM / Math.max(1, depthMeters)).toFixed(2);
 
   // Canvas 3D isometric rendering
   useEffect(() => {
@@ -603,122 +739,138 @@ const Conveyor3DCadView: React.FC<{ onShowToast: (m: string, t?: any) => void }>
     ctx.clearRect(0, 0, w, h);
 
     const rad = (rotationAngle * Math.PI) / 180;
-    const cx = w / 2;
-    const cy = h / 2 - 20;
+    const cx = w / 2 - 30;
+    const cy = h / 2 - 25;
 
     // Draw background grid
     ctx.strokeStyle = '#1e293b';
     ctx.lineWidth = 1;
-    for (let x = 40; x < w; x += 40) {
+    for (let x = 30; x < w; x += 35) {
       ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x, h);
       ctx.stroke();
     }
-    for (let y = 40; y < h; y += 40) {
+    for (let y = 30; y < h; y += 35) {
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(w, y);
       ctx.stroke();
     }
 
-    // 3D Buoy Geometry rendering
-    const cosR = Math.cos(rad);
-    const sinR = Math.sin(rad);
-
     // Surface Water Level Line
-    ctx.strokeStyle = '#0284c7';
+    ctx.strokeStyle = viewMode === 'ice' ? '#7dd3fc' : '#0284c7';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(40, cy - 80);
-    ctx.lineTo(w - 40, cy - 80);
+    ctx.moveTo(30, cy - 80);
+    ctx.lineTo(w - 30, cy - 80);
     ctx.stroke();
-    ctx.fillStyle = '#38bdf8';
+    ctx.fillStyle = viewMode === 'ice' ? '#bae6fd' : '#38bdf8';
     ctx.font = '10px monospace';
-    ctx.fillText('OCEAN SURFACE LEVEL (Z = 0m)', 50, cy - 86);
+    ctx.fillText(viewMode === 'ice' ? 'POLAR SEA ICE BOUNDARY (Z = 0m • -1.8°C)' : 'OCEAN SURFACE WATERLINE (Z = 0m)', 40, cy - 86);
+
+    // If Ice mode: draw surface ice floes
+    if (viewMode === 'ice') {
+      ctx.fillStyle = 'rgba(224, 242, 254, 0.4)';
+      ctx.strokeStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.rect(30, cy - 85, w - 60, 10);
+      ctx.fill();
+      ctx.stroke();
+    }
 
     // Flotation Collar (Torus / Oval in isometric)
     ctx.save();
     ctx.translate(cx, cy - 70);
     ctx.scale(1, 0.45);
     ctx.beginPath();
-    ctx.arc(0, 0, 70, 0, Math.PI * 2);
-    ctx.fillStyle = viewMode === 'wireframe' ? 'rgba(14, 165, 233, 0.1)' : '#0369a1';
+    ctx.arc(0, 0, 75, 0, Math.PI * 2);
+    ctx.fillStyle = viewMode === 'wireframe' ? 'rgba(14, 165, 233, 0.1)' : viewMode === 'ice' ? '#0369a1' : '#0284c7';
     ctx.fill();
     ctx.strokeStyle = '#38bdf8';
     ctx.lineWidth = 2;
     ctx.stroke();
     ctx.restore();
 
-    // Wind Turbine Mast & Rotor
+    // Wind Turbine Mast & Savonius Vertical Rotor
     ctx.strokeStyle = '#94a3b8';
     ctx.lineWidth = 4;
     ctx.beginPath();
     ctx.moveTo(cx, cy - 70);
-    ctx.lineTo(cx, cy - 150);
+    ctx.lineTo(cx, cy - 155);
     ctx.stroke();
 
-    // Rotor blades rotating
+    // Savonius Rotor kinetic movement
     ctx.strokeStyle = '#38bdf8';
     ctx.lineWidth = 3;
-    const bladeOffset = Math.sin(rad * 3) * 35;
+    const bladeOffset = Math.sin(rad * 3) * 38;
     ctx.beginPath();
-    ctx.moveTo(cx - 35 + bladeOffset, cy - 150);
-    ctx.lineTo(cx + 35 - bladeOffset, cy - 150);
+    ctx.moveTo(cx - 38 + bladeOffset, cy - 155);
+    ctx.lineTo(cx + 38 - bladeOffset, cy - 155);
     ctx.stroke();
 
-    // Central Titanium Cylinder (Depth Hull)
-    const hullHeight = 120;
+    // Central Titanium Cylinder (Depth Hull) with Wall Thickness Representation
+    const hullHeight = 125;
+    const hullWidth = 64;
     ctx.fillStyle = viewMode === 'wireframe' ? 'rgba(56, 189, 248, 0.05)' : '#0f172a';
-    ctx.strokeStyle = viewMode === 'wireframe' ? '#38bdf8' : '#0284c7';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = selectedPartId === 'sub-05' ? '#06b6d4' : viewMode === 'wireframe' ? '#38bdf8' : '#0284c7';
+    ctx.lineWidth = selectedPartId === 'sub-05' ? 3 : 2;
 
     ctx.beginPath();
-    ctx.roundRect(cx - 30, cy - 65, 60, hullHeight, 8);
+    ctx.roundRect(cx - hullWidth / 2, cy - 65, hullWidth, hullHeight, 8);
     ctx.fill();
     ctx.stroke();
 
-    // Subsurface Injector Nozzles
-    ctx.fillStyle = '#06b6d4';
-    ctx.fillRect(cx - 15, cy - 65 + hullHeight, 30, 20);
+    // Titanium Wall Thickness Inner Contour
+    const innerPadding = Math.max(3, titaniumThicknessMm / 4);
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(cx - hullWidth / 2 + innerPadding, cy - 65 + innerPadding, hullWidth - innerPadding * 2, hullHeight - innerPadding * 2);
+
+    // Subsurface Injector Nozzles & Ceramic Diffuser
+    ctx.fillStyle = selectedPartId === 'sub-03' ? '#a855f7' : '#06b6d4';
+    ctx.fillRect(cx - 18, cy - 65 + hullHeight, 36, 22);
 
     // Convective Brine Plume Mode / Particles
     if (viewMode === 'plume' || viewMode === 'solid') {
-      const plumeGrad = ctx.createLinearGradient(cx, cy - 65 + hullHeight, cx, h - 30);
-      plumeGrad.addColorStop(0, 'rgba(6, 182, 212, 0.8)');
-      plumeGrad.addColorStop(0.5, 'rgba(14, 165, 233, 0.5)');
-      plumeGrad.addColorStop(1, 'rgba(3, 105, 161, 0.05)');
+      const plumeGrad = ctx.createLinearGradient(cx, cy - 65 + hullHeight, cx, h - 25);
+      plumeGrad.addColorStop(0, 'rgba(6, 182, 212, 0.85)');
+      plumeGrad.addColorStop(0.5, 'rgba(14, 165, 233, 0.55)');
+      plumeGrad.addColorStop(1, 'rgba(3, 105, 161, 0.08)');
 
+      const plumeSpread = Math.min(110, 60 + (cadPumpRateLpm / 420) * 35);
       ctx.fillStyle = plumeGrad;
       ctx.beginPath();
-      ctx.moveTo(cx - 15, cy - 65 + hullHeight);
-      ctx.lineTo(cx + 15, cy - 65 + hullHeight);
-      ctx.lineTo(cx + 70, h - 30);
-      ctx.lineTo(cx - 70, h - 30);
+      ctx.moveTo(cx - 18, cy - 65 + hullHeight);
+      ctx.lineTo(cx + 18, cy - 65 + hullHeight);
+      ctx.lineTo(cx + plumeSpread, h - 25);
+      ctx.lineTo(cx - plumeSpread, h - 25);
       ctx.closePath();
       ctx.fill();
 
       // Plume sinking flow particles
       ctx.fillStyle = '#38bdf8';
-      for (let i = 0; i < 15; i++) {
-        const px = cx + (Math.sin(i * 1.3 + rad * 2) * (i * 3));
-        const py = cy + 60 + ((i * 18 + rotationAngle * 2) % (h - cy - 80));
+      for (let i = 0; i < 22; i++) {
+        const px = cx + (Math.sin(i * 1.3 + rad * 2) * (i * 3.5));
+        const py = cy + 60 + ((i * 15 + rotationAngle * 2.5) % (h - cy - 80));
         ctx.beginPath();
         ctx.arc(px, py, 2.5, 0, Math.PI * 2);
         ctx.fill();
       }
     }
 
-    // Depth label
+    // Depth and Spec Readout Overlay
     ctx.fillStyle = '#94a3b8';
-    ctx.font = '11px monospace';
-    ctx.fillText(`Target Depth: -${depthMeters}m`, cx + 80, cy + 20);
-    ctx.fillText(`Brine Salinity: ${salinityPsu} PSU`, cx + 80, cy + 40);
-    ctx.fillText(`Fleet Active: ${buoyCount} Units`, cx + 80, cy + 60);
-  }, [rotationAngle, viewMode, buoyCount, salinityPsu, depthMeters]);
+    ctx.font = '10px monospace';
+    ctx.fillText(`Target Depth: -${depthMeters}m (Limit: -${collapseDepthRatingM}m)`, cx + 75, cy - 10);
+    ctx.fillText(`Brine Salinity: ${salinityPsu} PSU (Δρ = +3.2 kg/m³)`, cx + 75, cy + 10);
+    ctx.fillText(`Pump Flow Rate: ${cadPumpRateLpm} L/min`, cx + 75, cy + 30);
+    ctx.fillText(`Titanium Wall: ${titaniumThicknessMm}mm (Ti-6Al-4V)`, cx + 75, cy + 50);
+    ctx.fillText(`Safety Factor: ${safetyFactorAtDepth}x Nominal`, cx + 75, cy + 70);
+  }, [rotationAngle, viewMode, buoyCount, salinityPsu, depthMeters, titaniumThicknessMm, cadPumpRateLpm, selectedPartId, collapseDepthRatingM, safetyFactorAtDepth]);
 
   // Derived metrics
-  const dailyBrineMass = Math.round((salinityPsu / 45) * (depthMeters / 280) * 1420 * buoyCount);
+  const dailyBrineMass = Math.round((salinityPsu / 45) * (depthMeters / 280) * (cadPumpRateLpm / 420) * 1420 * buoyCount);
   const annualPlumeM3 = ((dailyBrineMass * 365) / 1000000).toFixed(1);
 
   return (
@@ -764,17 +916,18 @@ const Conveyor3DCadView: React.FC<{ onShowToast: (m: string, t?: any) => void }>
 
           <div className="space-y-4">
             <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-4">
-              <h4 className="text-xs font-mono text-cyan-400 uppercase font-bold">Interactive Telemetry Parameters</h4>
+              <h4 className="text-xs font-mono text-cyan-400 uppercase font-bold">Interactive Telemetry & Hull Specs</h4>
 
               <div className="space-y-1">
                 <div className="flex justify-between text-xs font-mono">
-                  <span className="text-slate-400">Target Depth</span>
+                  <span className="text-slate-400">Target Depth Rating</span>
                   <span className="text-cyan-400">{depthMeters} m</span>
                 </div>
                 <input
                   type="range"
                   min="50"
-                  max="600"
+                  max="1000"
+                  step="25"
                   value={depthMeters}
                   onChange={(e) => setDepthMeters(Number(e.target.value))}
                   className="w-full accent-cyan-500"
@@ -783,13 +936,13 @@ const Conveyor3DCadView: React.FC<{ onShowToast: (m: string, t?: any) => void }>
 
               <div className="space-y-1">
                 <div className="flex justify-between text-xs font-mono">
-                  <span className="text-slate-400">Salinity Density</span>
+                  <span className="text-slate-400">Brine Salinity Concentration</span>
                   <span className="text-emerald-400">{salinityPsu} PSU</span>
                 </div>
                 <input
                   type="range"
                   min="36"
-                  max="52"
+                  max="55"
                   value={salinityPsu}
                   onChange={(e) => setSalinityPsu(Number(e.target.value))}
                   className="w-full accent-emerald-500"
@@ -798,7 +951,44 @@ const Conveyor3DCadView: React.FC<{ onShowToast: (m: string, t?: any) => void }>
 
               <div className="space-y-1">
                 <div className="flex justify-between text-xs font-mono">
-                  <span className="text-slate-400">Fleet Deployment</span>
+                  <span className="text-slate-400">Grade 5 Titanium Hull Wall</span>
+                  <span className="text-indigo-400 font-bold">{titaniumThicknessMm} mm</span>
+                </div>
+                <input
+                  type="range"
+                  min="12"
+                  max="24"
+                  step="1"
+                  value={titaniumThicknessMm}
+                  onChange={(e) => setTitaniumThicknessMm(Number(e.target.value))}
+                  className="w-full accent-indigo-500"
+                />
+                <div className="text-[10px] text-slate-500 flex justify-between font-mono">
+                  <span>12mm (580m)</span>
+                  <span>16mm (770m)</span>
+                  <span>24mm (1,150m)</span>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs font-mono">
+                  <span className="text-slate-400">Pump Flow Rate</span>
+                  <span className="text-amber-400 font-bold">{cadPumpRateLpm} L/min</span>
+                </div>
+                <input
+                  type="range"
+                  min="100"
+                  max="2500"
+                  step="50"
+                  value={cadPumpRateLpm}
+                  onChange={(e) => setCadPumpRateLpm(Number(e.target.value))}
+                  className="w-full accent-amber-500"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs font-mono">
+                  <span className="text-slate-400">Fleet Buoys Active</span>
                   <span className="text-purple-400">{buoyCount} Units</span>
                 </div>
                 <input
@@ -815,7 +1005,58 @@ const Conveyor3DCadView: React.FC<{ onShowToast: (m: string, t?: any) => void }>
             <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2 text-xs font-mono">
               <div className="text-slate-400">Daily Brine Mass: <span className="text-white font-bold">{dailyBrineMass.toLocaleString()} tons/day</span></div>
               <div className="text-slate-400">Annual Plume Vol: <span className="text-cyan-400 font-bold">{annualPlumeM3} M m³</span></div>
-              <div className="text-slate-400">Sinking Convection: <span className="text-emerald-400 font-bold">1.84 m/s</span></div>
+              <div className="text-slate-400">Titanium Burst Limit: <span className="text-indigo-400 font-bold">{maxAllowablePressureBar} Bar</span></div>
+              <div className="text-slate-400">Safety Margin: <span className="text-emerald-400 font-bold">{safetyFactorAtDepth}x</span></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Exploded CAD Part Explorer */}
+        <div className="mt-6 pt-6 border-t border-slate-800 space-y-4">
+          <div className="flex justify-between items-center">
+            <span className="text-xs font-mono text-cyan-400 uppercase font-semibold">Subsystem Hardware Blueprints</span>
+            <span className="text-[11px] font-mono text-slate-400">Click a part to inspect CAD engineering specs:</span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+            {CONVEYOR_CAD_PARTS.map((part) => (
+              <button
+                key={part.id}
+                onClick={() => setSelectedPartId(part.id)}
+                className={`p-2.5 rounded-xl border text-left text-xs font-mono transition-all cursor-pointer ${
+                  selectedPartId === part.id
+                    ? 'bg-cyan-950/40 border-cyan-500 text-cyan-300 font-bold shadow-md shadow-cyan-950/40'
+                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                }`}
+              >
+                <div className="truncate text-[11px]">{part.name.split(' ')[0]}</div>
+                <div className="text-[9px] text-slate-500 truncate">{part.partNo}</div>
+              </button>
+            ))}
+          </div>
+
+          {/* Selected Part Detail Card */}
+          <div className="p-5 rounded-xl bg-slate-950 border border-slate-800 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
+            <div className="space-y-1.5 md:col-span-1">
+              <span className="text-[10px] text-cyan-400 uppercase">{selectedPart.subsystemCategory}</span>
+              <h4 className="text-sm font-bold text-white">{selectedPart.name}</h4>
+              <div className="text-slate-400 text-[11px]">Part No: <span className="text-white">{selectedPart.partNo}</span></div>
+              <div className="text-slate-400 text-[11px]">Material: <span className="text-cyan-300">{selectedPart.materialSpec}</span></div>
+              <div className="text-slate-400 text-[11px]">CAD STEP File: <span className="text-slate-300">{selectedPart.cadFileRef}</span></div>
+            </div>
+
+            <div className="space-y-1.5 md:col-span-1">
+              <span className="text-[10px] text-emerald-400 uppercase">Operational Telemetry</span>
+              <div className="text-white font-bold">{selectedPart.telemetryMetric}</div>
+              <div className="text-slate-400 text-[11px]">Depth Rating: <span className="text-white">{selectedPart.layerDepthMeters}m</span></div>
+              <div className="text-slate-400 text-[11px]">Hydrostatic Pressure: <span className="text-white">{selectedPart.pressureBar} Bar</span></div>
+              <div className="text-slate-400 text-[11px]">Last Inspection: <span className="text-emerald-400">{selectedPart.lastInspectionDate}</span></div>
+            </div>
+
+            <div className="space-y-1.5 md:col-span-1 bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+              <span className="text-[10px] text-purple-400 uppercase">Physics Governing Equation</span>
+              <div className="text-indigo-300 font-bold text-[11px]">{selectedPart.physicsFormula}</div>
+              <p className="text-[10px] text-slate-400 leading-relaxed pt-1">{selectedPart.description}</p>
             </div>
           </div>
         </div>
@@ -1266,32 +1507,46 @@ const ConveyorFundingPipelineView: React.FC<{ onShowToast: (m: string, t?: any) 
 };
 
 /* ========================================================================= */
+/* ========================================================================= */
 /* 10. GRANT & R&D REBATE OUTREACH HUB                                       */
 /* ========================================================================= */
 const ConveyorOutreachHubView: React.FC<{ onShowToast: (m: string, t?: any) => void }> = ({ onShowToast }) => {
   const [labCost, setLabCost] = useState(180000);
-  const [engineerCost, setEngineerCost] = useState(65000);
-  const [trialsCost, setTrialsCost] = useState(85000);
-  const [materialsCost, setMaterialsCost] = useState(120000);
+  const [hullCost, setHullCost] = useState(120000);
+  const [engineerCost, setEngineerCost] = useState(85000);
+  const [nozzlesCost, setNozzlesCost] = useState(65000);
+  const [trialsCost, setTrialsCost] = useState(95000);
+  const [complianceCost, setComplianceCost] = useState(45000);
 
+  const [targetOrg, setTargetOrg] = useState('Callaghan Innovation New Partnered R&D Grant (40% Cash Co-Funding)');
+  const [focusArea, setFocusArea] = useState('AMOC Subsurface Salinity Downwelling Restoration & Physical Oceanography');
   const [aiProposal, setAiProposal] = useState<string>('');
   const [isGeneratingGrant, setIsGeneratingGrant] = useState(false);
 
-  const totalSpend = labCost + engineerCost + trialsCost + materialsCost;
+  const totalSpend = labCost + hullCost + engineerCost + nozzlesCost + trialsCost + complianceCost;
   const callaghanRebate = Math.round(totalSpend * 0.4);
 
   const handleGenerateAiGrant = async () => {
     setIsGeneratingGrant(true);
-    onShowToast('Connecting to Gemini 3.8 Flash to write Callaghan R&D grant proposal...', 'info');
+    onShowToast(`Connecting to Gemini 3.8 Flash to write formal grant proposal for ${targetOrg.split(' ')[0]}...`, 'info');
 
     try {
       const res = await fetch('/api/conveyor/generate-grant', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          organization: 'Callaghan Innovation & Outset Ventures (Pukekohe)',
-          focusArea: 'Atlantic Meridional Overturning Circulation (AMOC) Stabilization & Subsurface Brine Downwelling',
-          targetAmountNZD: callaghanRebate,
+          organization: targetOrg,
+          fundType: targetOrg,
+          focusArea,
+          targetAmountNZD: totalSpend,
+          expenditureCategories: {
+            'Pukekohe Wet-Lab & Pressure Tank Prototyping': `$${labCost.toLocaleString()} NZD`,
+            'Grade 5 Titanium Pressure Vessels & Hull Fabrication': `$${hullCost.toLocaleString()} NZD`,
+            'Marine & Firmware Engineering Salaries': `$${engineerCost.toLocaleString()} NZD`,
+            'Ceramic Impeller Diffusion Nozzle Hydraulics': `$${nozzlesCost.toLocaleString()} NZD`,
+            'Hauraki Gulf Vessel Charter & Offshore Sea Trials': `$${trialsCost.toLocaleString()} NZD`,
+            'Maritime NZ Safety & EPA Environmental Consents': `$${complianceCost.toLocaleString()} NZD`,
+          },
         }),
       });
 
@@ -1311,48 +1566,97 @@ const ConveyorOutreachHubView: React.FC<{ onShowToast: (m: string, t?: any) => v
     }
   };
 
+  const handleExportClaimCsv = () => {
+    const csvContent =
+      'Category,Subsystem Description,Eligible Spend (NZD),Rebate Rate,Cash Claim (NZD)\n' +
+      `Wet-Lab Prototyping,Pukekohe Hydrodynamic Pressure Tank Testing,${labCost},40%,${Math.round(labCost * 0.4)}\n` +
+      `Hardware Fabrication,Grade 5 Titanium Pressure Vessels & Hull Enclosures,${hullCost},40%,${Math.round(hullCost * 0.4)}\n` +
+      `Engineering Personnel,Marine Hydrodynamics & Electrical Engineering Labor,${engineerCost},40%,${Math.round(engineerCost * 0.4)}\n` +
+      `Diffuser Hydraulics,Ceramic Impeller Diffusion Nozzles & Flow Chambers,${nozzlesCost},40%,${Math.round(nozzlesCost * 0.4)}\n` +
+      `Offshore Sea Trials,Hauraki Gulf & Southern Ocean Vessel Charters,${trialsCost},40%,${Math.round(trialsCost * 0.4)}\n` +
+      `Regulatory Compliance,Maritime NZ Part 22 & EPA Permitted Activity Consents,${complianceCost},40%,${Math.round(complianceCost * 0.4)}\n` +
+      `TOTAL,Combined Qualifying DeepTech R&D Program,${totalSpend},40%,${callaghanRebate}\n`;
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Callaghan_Innovation_R&D_Rebate_Schedule_${totalSpend}NZD.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    onShowToast('Exported Callaghan Innovation R&D Rebate Schedule (.csv)', 'success');
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-        <div className="border-b border-slate-800 pb-4">
-          <span className="text-xs font-mono text-cyan-400 uppercase font-semibold">Government Co-Funding Rebate</span>
-          <h2 className="text-xl font-bold text-white mt-1">Callaghan Innovation 40% R&D Rebate Calculator</h2>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <span className="text-xs font-mono text-cyan-400 uppercase font-semibold">Government Co-Funding Rebate & Grants</span>
+            <h2 className="text-xl font-bold text-white mt-1">Callaghan Innovation 40% R&D Rebate & AI Grant Writer</h2>
+          </div>
+          <button
+            onClick={handleExportClaimCsv}
+            className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md shadow-emerald-600/20"
+          >
+            <i className="fas fa-file-csv"></i>
+            Export Claim Schedule (.csv)
+          </button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6">
           <div className="space-y-4">
-            <h4 className="text-sm font-bold text-white font-mono">Eligible R&D Expenditure Categories (NZD)</h4>
+            <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider flex items-center gap-2">
+              <i className="fas fa-sliders text-cyan-400"></i>
+              Qualifying Expenditure Categories (NZD)
+            </h4>
 
             <div className="space-y-1">
               <div className="flex justify-between text-xs font-mono">
-                <span className="text-slate-400">Pukekohe Wet-Lab & Pressure Tank Prototyping</span>
-                <span className="text-white">${labCost.toLocaleString()}</span>
+                <span className="text-slate-400">1. Pukekohe Wet-Lab & Pressure Tank Prototyping</span>
+                <span className="text-white font-bold">${labCost.toLocaleString()}</span>
               </div>
-              <input type="range" min="50000" max="400000" step="10000" value={labCost} onChange={(e) => setLabCost(Number(e.target.value))} className="w-full accent-cyan-500" />
+              <input type="range" min="30000" max="400000" step="5000" value={labCost} onChange={(e) => setLabCost(Number(e.target.value))} className="w-full accent-cyan-500" />
             </div>
 
             <div className="space-y-1">
               <div className="flex justify-between text-xs font-mono">
-                <span className="text-slate-400">Marine & Electrical Engineering Salaries</span>
-                <span className="text-white">${engineerCost.toLocaleString()}</span>
+                <span className="text-slate-400">2. Grade 5 Titanium Vessels & Hull Fabrication</span>
+                <span className="text-white font-bold">${hullCost.toLocaleString()}</span>
+              </div>
+              <input type="range" min="30000" max="300000" step="5000" value={hullCost} onChange={(e) => setHullCost(Number(e.target.value))} className="w-full accent-cyan-500" />
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex justify-between text-xs font-mono">
+                <span className="text-slate-400">3. Marine & Firmware Engineering Salaries</span>
+                <span className="text-white font-bold">${engineerCost.toLocaleString()}</span>
               </div>
               <input type="range" min="30000" max="250000" step="5000" value={engineerCost} onChange={(e) => setEngineerCost(Number(e.target.value))} className="w-full accent-cyan-500" />
             </div>
 
             <div className="space-y-1">
               <div className="flex justify-between text-xs font-mono">
-                <span className="text-slate-400">Hauraki Gulf Vessel Charter & Sea Trials</span>
-                <span className="text-white">${trialsCost.toLocaleString()}</span>
+                <span className="text-slate-400">4. Ceramic Impeller Diffusion Nozzle Hydraulics</span>
+                <span className="text-white font-bold">${nozzlesCost.toLocaleString()}</span>
+              </div>
+              <input type="range" min="20000" max="150000" step="5000" value={nozzlesCost} onChange={(e) => setNozzlesCost(Number(e.target.value))} className="w-full accent-cyan-500" />
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex justify-between text-xs font-mono">
+                <span className="text-slate-400">5. Hauraki Gulf Vessel Charter & Sea Trials</span>
+                <span className="text-white font-bold">${trialsCost.toLocaleString()}</span>
               </div>
               <input type="range" min="20000" max="200000" step="5000" value={trialsCost} onChange={(e) => setTrialsCost(Number(e.target.value))} className="w-full accent-cyan-500" />
             </div>
 
             <div className="space-y-1">
               <div className="flex justify-between text-xs font-mono">
-                <span className="text-slate-400">Grade 5 Titanium & Ceramic Impeller Materials</span>
-                <span className="text-white">${materialsCost.toLocaleString()}</span>
+                <span className="text-slate-400">6. Maritime NZ Safety & EPA Environmental Consents</span>
+                <span className="text-white font-bold">${complianceCost.toLocaleString()}</span>
               </div>
-              <input type="range" min="30000" max="300000" step="10000" value={materialsCost} onChange={(e) => setMaterialsCost(Number(e.target.value))} className="w-full accent-cyan-500" />
+              <input type="range" min="10000" max="100000" step="2500" value={complianceCost} onChange={(e) => setComplianceCost(Number(e.target.value))} className="w-full accent-cyan-500" />
             </div>
           </div>
 
@@ -1365,25 +1669,42 @@ const ConveyorOutreachHubView: React.FC<{ onShowToast: (m: string, t?: any) => v
             <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
               <span className="text-xs font-mono text-emerald-400 uppercase font-bold">Callaghan 40% Non-Dilutive Cash Rebate</span>
               <div className="text-3xl font-extrabold font-mono text-emerald-400 mt-1">+${callaghanRebate.toLocaleString()} NZD</div>
-              <p className="text-[11px] text-slate-300 mt-2">
-                Eligible under Callaghan Innovation New Partnered R&D Grant rules for New Zealand incorporated deep tech entities.
+              <p className="text-[11px] text-slate-300 mt-2 leading-relaxed">
+                Eligible under Callaghan Innovation New Partnered R&D Grant rules for New Zealand incorporated deep tech entities. Cash credited directly to company account upon milestone submission.
               </p>
             </div>
 
-            <div className="flex gap-2">
-              <button
-                onClick={() => onShowToast('Exported Callaghan Innovation R&D grant expenditure schedule', 'success')}
-                className="flex-1 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-mono text-xs font-bold transition-all cursor-pointer"
-              >
-                Export Claim File
-              </button>
+            <div className="space-y-3 pt-2">
+              <div className="space-y-1">
+                <label className="text-[11px] font-mono text-slate-400">Target Grant Body & Funding Stream:</label>
+                <select
+                  value={targetOrg}
+                  onChange={(e) => setTargetOrg(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white font-mono focus:border-cyan-500 focus:outline-none"
+                >
+                  <option value="Callaghan Innovation New Partnered R&D Grant (40% Cash Co-Funding)">Callaghan Innovation New Partnered R&D (40% Cash Rebate)</option>
+                  <option value="MBIE Endeavour Fund (Smart Ideas & Research Programmes)">MBIE Endeavour Fund ($1M NZD Transformational Science)</option>
+                  <option value="Outset Ventures DeepTech Incubation Seed Fund (Pukekohe)">Outset Ventures DeepTech Seed Round ($500k NZD)</option>
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-mono text-slate-400">Proposal Focus Area:</label>
+                <input
+                  type="text"
+                  value={focusArea}
+                  onChange={(e) => setFocusArea(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white font-mono focus:border-cyan-500 focus:outline-none"
+                />
+              </div>
+
               <button
                 onClick={handleGenerateAiGrant}
                 disabled={isGeneratingGrant}
-                className="flex-1 py-2.5 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-mono text-xs font-bold transition-all shadow-md shadow-purple-600/30 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="w-full py-3 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-mono text-xs font-bold transition-all shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 <i className={`fas ${isGeneratingGrant ? 'fa-spinner fa-spin' : 'fa-brain'}`}></i>
-                <span>{isGeneratingGrant ? 'Generating...' : 'AI Grant Proposal (Gemini)'}</span>
+                <span>{isGeneratingGrant ? 'Synthesizing Grant with Gemini 3.8...' : 'Generate Formal R&D Proposal (Gemini AI)'}</span>
               </button>
             </div>
           </div>
@@ -1391,12 +1712,12 @@ const ConveyorOutreachHubView: React.FC<{ onShowToast: (m: string, t?: any) => v
 
         {/* AI Proposal Display Area */}
         {aiProposal && (
-          <div className="mt-6 p-6 rounded-xl bg-slate-950 border border-purple-500/30 space-y-4">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+          <div className="mt-6 p-6 rounded-xl bg-slate-950 border border-purple-500/40 space-y-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse"></span>
                 <span className="text-xs font-mono text-purple-300 font-bold uppercase">
-                  Gemini Generated Callaghan / Outset Ventures Grant Draft
+                  Gemini Generated Formal Grant Proposal Draft ({targetOrg.split(' ')[0]})
                 </span>
               </div>
               <div className="flex gap-2">
@@ -1405,19 +1726,34 @@ const ConveyorOutreachHubView: React.FC<{ onShowToast: (m: string, t?: any) => v
                     navigator.clipboard.writeText(aiProposal);
                     onShowToast('Copied proposal to clipboard!', 'success');
                   }}
-                  className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-xs font-mono"
+                  className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-xs font-mono flex items-center gap-1 cursor-pointer"
                 >
-                  <i className="fas fa-copy mr-1"></i> Copy
+                  <i className="fas fa-copy"></i> Copy
+                </button>
+                <button
+                  onClick={() => {
+                    const blob = new Blob([aiProposal], { type: 'text/markdown;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `SaliBuoy_${targetOrg.split(' ')[0]}_Grant_Proposal.md`;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                    onShowToast('Downloaded proposal (.md)', 'success');
+                  }}
+                  className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-xs font-mono flex items-center gap-1 cursor-pointer"
+                >
+                  <i className="fas fa-download"></i> Download (.md)
                 </button>
                 <button
                   onClick={() => setAiProposal('')}
-                  className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded text-xs font-mono"
+                  className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded text-xs font-mono cursor-pointer"
                 >
                   Close
                 </button>
               </div>
             </div>
-            <pre className="text-xs text-slate-300 font-mono whitespace-pre-wrap leading-relaxed max-h-96 overflow-y-auto pr-2">
+            <pre className="text-xs text-slate-300 font-mono whitespace-pre-wrap leading-relaxed max-h-[480px] overflow-y-auto pr-2 bg-slate-900/60 p-4 rounded-xl border border-slate-800/80">
               {aiProposal}
             </pre>
           </div>
@@ -1579,31 +1915,223 @@ const ConveyorNzBusinessView: React.FC<{ onShowToast: (m: string, t?: any) => vo
 };
 
 /* ========================================================================= */
-/* 14. MARITIME & EPA COMPLIANCE                                             */
+/* 14. EPA & MARITIME NZ FILINGS HUB (EIA GENERATOR)                         */
 /* ========================================================================= */
 const ConveyorRegulatoryView: React.FC<{ onShowToast: (m: string, t?: any) => void }> = ({ onShowToast }) => {
+  const [location, setLocation] = useState('Hauraki Gulf Outer Continental Shelf (Firth of Thames Seaward Boundary)');
+  const [durationDays, setDurationDays] = useState(30);
+  const [salinityPsu, setSalinityPsu] = useState(45);
+  const [buoyUnits, setBuoyUnits] = useState(3);
+  const [flowRateLpm, setFlowRateLpm] = useState(420);
+
+  const [eiaDocument, setEiaDocument] = useState<string>('');
+  const [isGeneratingEia, setIsGeneratingEia] = useState(false);
+
+  const handleGenerateEia = async () => {
+    setIsGeneratingEia(true);
+    onShowToast('Connecting to Gemini 3.8 Flash to draft formal EPA & Maritime NZ EIA notification...', 'info');
+
+    try {
+      const res = await fetch('/api/conveyor/generate-eia', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location,
+          trialDurationDays: durationDays,
+          dischargeSalinityPsu: salinityPsu,
+          buoyUnits,
+          flowRateLpm,
+        }),
+      });
+
+      if (!res.ok) throw new Error('EIA generation request failed');
+      const data = await res.json();
+      if (data.eiaDocument) {
+        setEiaDocument(data.eiaDocument);
+        onShowToast('Generated formal EPA Environmental Impact Assessment!', 'success');
+      } else {
+        throw new Error('No EIA document returned');
+      }
+    } catch (err: any) {
+      console.error(err);
+      onShowToast('Error drafting EIA document. Check network.', 'error');
+    } finally {
+      setIsGeneratingEia(false);
+    }
+  };
+
+  const handleDownloadEiaText = () => {
+    if (!eiaDocument) return;
+    const blob = new Blob([eiaDocument], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'SaliBuoy_EPA_MaritimeNZ_Permitted_Activity_EIA.txt';
+    link.click();
+    URL.revokeObjectURL(url);
+    onShowToast('Downloaded formal EIA notification document (.txt)', 'success');
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-        <div className="border-b border-slate-800 pb-4">
-          <span className="text-xs font-mono text-cyan-400 uppercase font-semibold">Regulatory Framework</span>
-          <h2 className="text-xl font-bold text-white mt-1">Maritime NZ COLREGS & EPA Coastal Discharge Permitted Activity</h2>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <span className="text-xs font-mono text-cyan-400 uppercase font-semibold">Maritime & Environmental Compliance</span>
+            <h2 className="text-xl font-bold text-white mt-1">EPA & Maritime NZ Filings Hub (EIA Generator)</h2>
+          </div>
+          <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-mono">
+            Section 20 EEZ Act Permitted Activity
+          </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 text-xs text-slate-300">
-          <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-            <div className="font-bold text-cyan-400 font-mono">1. Maritime NZ COLREGS</div>
-            <p>Moored buoy compliance with IALA maritime navigation marking standards, radar reflectors, and yellow flashing strobe lights (Fl(5) Y 20s).</p>
+        {/* EIA Generator Controls */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6">
+          <div className="space-y-4">
+            <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider flex items-center gap-2">
+              <i className="fas fa-file-contract text-cyan-400"></i>
+              Offshore Proving Trial Parameters
+            </h4>
+
+            <div className="space-y-1">
+              <label className="text-xs font-mono text-slate-400">Trial Proving Zone & Bathymetry:</label>
+              <select
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white font-mono focus:border-cyan-500 focus:outline-none"
+              >
+                <option value="Hauraki Gulf Outer Continental Shelf (Firth of Thames Seaward Boundary)">Hauraki Gulf Outer Continental Shelf (Firth of Thames Seaward Boundary)</option>
+                <option value="Cape Reinga Deep Trench (Northland Continental Shelf)">Cape Reinga Deep Trench (Northland Continental Shelf)</option>
+                <option value="Campbell Plateau Sub-Antarctic Ocean Waters">Campbell Plateau Sub-Antarctic Ocean Waters</option>
+              </select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs font-mono">
+                  <span className="text-slate-400">Trial Duration</span>
+                  <span className="text-white font-bold">{durationDays} Days</span>
+                </div>
+                <input type="range" min="7" max="90" step="1" value={durationDays} onChange={(e) => setDurationDays(Number(e.target.value))} className="w-full accent-cyan-500" />
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs font-mono">
+                  <span className="text-slate-400">Buoy Units</span>
+                  <span className="text-purple-400 font-bold">{buoyUnits} Buoys</span>
+                </div>
+                <input type="range" min="1" max="10" step="1" value={buoyUnits} onChange={(e) => setBuoyUnits(Number(e.target.value))} className="w-full accent-purple-500" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs font-mono">
+                  <span className="text-slate-400">Discharge Salinity</span>
+                  <span className="text-emerald-400 font-bold">{salinityPsu} PSU</span>
+                </div>
+                <input type="range" min="38" max="50" step="1" value={salinityPsu} onChange={(e) => setSalinityPsu(Number(e.target.value))} className="w-full accent-emerald-500" />
+                <div className="text-[9px] text-slate-500 font-mono">0% Chemical Polymers</div>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs font-mono">
+                  <span className="text-slate-400">Flow Rate / Buoy</span>
+                  <span className="text-cyan-400 font-bold">{flowRateLpm} L/min</span>
+                </div>
+                <input type="range" min="100" max="1200" step="20" value={flowRateLpm} onChange={(e) => setFlowRateLpm(Number(e.target.value))} className="w-full accent-cyan-500" />
+                <div className="text-[9px] text-slate-500 font-mono">200m Injection Depth</div>
+              </div>
+            </div>
+
+            <button
+              onClick={handleGenerateEia}
+              disabled={isGeneratingEia}
+              className="w-full py-3 rounded-lg bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white font-mono text-xs font-bold transition-all shadow-lg shadow-cyan-600/30 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              <i className={`fas ${isGeneratingEia ? 'fa-spinner fa-spin' : 'fa-balance-scale'}`}></i>
+              <span>{isGeneratingEia ? 'Generating Formal EIA Filing with Gemini...' : 'Generate Formal EIA Notification Draft (Gemini AI)'}</span>
+            </button>
           </div>
-          <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-            <div className="font-bold text-emerald-400 font-mono">2. EPA EEZ Permitted Activity</div>
-            <p>Non-toxic natural seawater concentrate qualifies under marine scientific research exemptions with zero chemical polymer additives.</p>
-          </div>
-          <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-            <div className="font-bold text-purple-400 font-mono">3. UNCLOS Marine Research</div>
-            <p>Conducting subsea oceanographic measurement and cryo-restoration trials in accordance with the United Nations Convention on the Law of the Sea.</p>
+
+          {/* Statutory Matrix Highlights */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider flex items-center gap-2">
+              <i className="fas fa-shield-alt text-emerald-400"></i>
+              Statutory Compliance & Safeguards
+            </h4>
+
+            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2 text-xs">
+              <div className="font-bold text-emerald-400 font-mono flex items-center gap-2">
+                <i className="fas fa-check-circle"></i>
+                1. EPA EEZ Permitted Activity Framework (Section 20)
+              </div>
+              <p className="text-slate-300 leading-relaxed text-[11px]">
+                Under Section 20 of the Exclusive Economic Zone and Continental Shelf Act 2012, non-extractive scientific downwelling trials utilizing purely concentrated natural seawater qualify as a Permitted Activity. No discretionary consent hearing required.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2 text-xs">
+              <div className="font-bold text-cyan-400 font-mono flex items-center gap-2">
+                <i className="fas fa-ship"></i>
+                2. Maritime Rules Part 22 (COLREGS Navigational Safety)
+              </div>
+              <p className="text-slate-300 leading-relaxed text-[11px]">
+                All moored sentinel buoys carry an IALA Special Purpose yellow cross topmark, active radar reflectors, AIS AtoN Type 3 transponders, and yellow flashing strobe lights (Fl(5) Y 20s) with 4.5 NM visibility range.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2 text-xs">
+              <div className="font-bold text-purple-400 font-mono flex items-center gap-2">
+                <i className="fas fa-water"></i>
+                3. Non-Toxicity & Benthic Dispersion Guarantee
+              </div>
+              <p className="text-slate-300 leading-relaxed text-[11px]">
+                100% natural ambient seawater concentrated via mechanical brine filters. Negative buoyancy drives rapid downward sinking at 1.84 m/s, dissipating along deep bathymetric contours without affecting photic marine life.
+              </p>
+            </div>
           </div>
         </div>
+
+        {/* EIA Document Viewer */}
+        {eiaDocument && (
+          <div className="mt-6 p-6 rounded-xl bg-slate-950 border border-cyan-500/40 space-y-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                <span className="text-xs font-mono text-cyan-300 font-bold uppercase">
+                  Formal EPA & Maritime NZ Environmental Impact Assessment (EIA) Draft
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(eiaDocument);
+                    onShowToast('Copied EIA notification to clipboard!', 'success');
+                  }}
+                  className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-xs font-mono flex items-center gap-1 cursor-pointer"
+                >
+                  <i className="fas fa-copy"></i> Copy
+                </button>
+                <button
+                  onClick={handleDownloadEiaText}
+                  className="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded text-xs font-mono flex items-center gap-1 cursor-pointer"
+                >
+                  <i className="fas fa-download"></i> Download (.txt)
+                </button>
+                <button
+                  onClick={() => setEiaDocument('')}
+                  className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded text-xs font-mono cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+            <pre className="text-xs text-slate-300 font-mono whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto pr-2 bg-slate-900/60 p-4 rounded-xl border border-slate-800/80">
+              {eiaDocument}
+            </pre>
+          </div>
+        )}
       </div>
     </div>
   );

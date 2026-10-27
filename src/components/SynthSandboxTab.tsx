@@ -7,6 +7,9 @@ import { loadSavedPresets, savePresetsToStorage, FACTORY_PRESETS } from '../lib/
 import { webgpuDSP, WebGPUPerformanceStats } from '../lib/webgpuEngine';
 import { LiveJamRoom } from './LiveJamRoom';
 import { generateProjectExportBundle, downloadBundleAsZip } from '../lib/exportBundler';
+import { WaveformVisualizer } from './WaveformVisualizer';
+import { AudioVisualizer } from './AudioVisualizer';
+import { ReactNativeCppModal } from './ReactNativeCppModal';
 
 interface SynthSandboxTabProps {
   engines: EngineModel[];
@@ -39,6 +42,10 @@ export const SynthSandboxTab: React.FC<SynthSandboxTabProps> = ({
   const [scopeMode, setScopeMode] = useState<'4d_waterfall' | '3d_circular' | '2d'>('4d_waterfall');
   const [isRecordingSession, setIsRecordingSession] = useState(false);
   const [lastAudioExport, setLastAudioExport] = useState<{ url: string; name: string } | null>(null);
+  const [isReactNativeModalOpen, setIsReactNativeModalOpen] = useState(false);
+
+  const currentEngine = engines.find((e) => e.id === currentEngineId);
+  const currentEngineName = currentEngine?.name || 'Selected PolyBLEP Synth';
 
   // Roadmap Item 1: WebGPU Acceleration state
   const [isWebGpuActive, setIsWebGpuActive] = useState(false);
@@ -441,6 +448,39 @@ export const SynthSandboxTab: React.FC<SynthSandboxTabProps> = ({
             </button>
 
             <button
+              onClick={() => setIsReactNativeModalOpen(true)}
+              className="px-3 py-2 rounded-xl bg-gradient-to-r from-cyan-900/90 to-indigo-900/90 hover:from-cyan-800 hover:to-indigo-800 text-cyan-200 border border-cyan-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md"
+              title="Inspect React Native TurboModule & C++ DSP Architecture"
+            >
+              <i className="fas fa-microchip text-cyan-400"></i>
+              <span>React Native & C++ Bridge</span>
+            </button>
+
+            <a
+              href="https://universal-ai-shopping-agent.ai.studio"
+              target="_blank"
+              rel="noreferrer"
+              className="px-3 py-2 rounded-xl bg-gradient-to-r from-amber-900/90 to-yellow-900/90 hover:from-amber-800 hover:to-yellow-800 text-amber-200 border border-amber-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md"
+              title="Open Universal AI Shopping Agent Studio"
+            >
+              <i className="fas fa-shopping-bag text-amber-300"></i>
+              <span>Shopping Agent</span>
+              <i className="fas fa-external-link-alt text-[9px] opacity-70"></i>
+            </a>
+
+            <a
+              href="https://synth-horizons-gen-pwa-app-builder.ai.studio"
+              target="_blank"
+              rel="noreferrer"
+              className="px-3 py-2 rounded-xl bg-gradient-to-r from-purple-900/90 to-pink-900/90 hover:from-purple-800 hover:to-pink-800 text-purple-200 border border-purple-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md"
+              title="Open Synth Horizons Gen PWA App Builder"
+            >
+              <i className="fas fa-layer-group text-purple-300"></i>
+              <span>Synth Horizons PWA</span>
+              <i className="fas fa-external-link-alt text-[9px] opacity-70"></i>
+            </a>
+
+            <button
               onClick={handleExportMobileAUv3}
               className="px-3 py-2 rounded-xl bg-purple-900/80 hover:bg-purple-800 text-purple-200 border border-purple-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md"
             >
@@ -538,6 +578,15 @@ export const SynthSandboxTab: React.FC<SynthSandboxTabProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Panel: Synthesis Controls (8 cols) */}
         <div className="lg:col-span-8 bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6 shadow-xl">
+          {/* Primary AudioVisualizer: Real-Time Canvas Frequency & Waveform Analyser */}
+          <AudioVisualizer
+            currentEngineId={currentEngineId}
+            engineName={currentEngineName}
+            synthParams={synthParams}
+            activeNotes={activeNotes}
+            className="border-indigo-500/30"
+          />
+
           {/* 4D REALTIME ANALYSER OSCILLOSCOPE Screen */}
           <div className="bg-slate-950 border border-emerald-500/30 rounded-xl p-4 relative space-y-2">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-2">
@@ -627,6 +676,33 @@ export const SynthSandboxTab: React.FC<SynthSandboxTabProps> = ({
                 <h3 className="text-xs font-bold text-white font-mono uppercase tracking-wider">
                   32-Step Advanced Web DAW Workstation
                 </h3>
+                <a
+                  href="https://altamonte-205-quantum-ai-synth-album-studio.ai.studio"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-[10px] font-mono hover:bg-cyan-500/20 transition-colors"
+                >
+                  <i className="fas fa-compact-disc text-[9px] text-cyan-400"></i>
+                  <span>altamonte-205.ai.studio</span>
+                </a>
+                <a
+                  href="https://universal-ai-shopping-agent.ai.studio"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[10px] font-mono hover:bg-amber-500/20 transition-colors"
+                >
+                  <i className="fas fa-shopping-bag text-[9px] text-amber-400"></i>
+                  <span>universal-ai-shopping-agent.ai.studio</span>
+                </a>
+                <a
+                  href="https://synth-horizons-gen-pwa-app-builder.ai.studio"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-pink-500/10 border border-pink-500/30 text-pink-300 text-[10px] font-mono hover:bg-pink-500/20 transition-colors"
+                >
+                  <i className="fas fa-layer-group text-[9px] text-pink-400"></i>
+                  <span>synth-horizons-pwa.ai.studio</span>
+                </a>
                 <a
                   href="https://sonorus-melodious-v12-3.ai.studio"
                   target="_blank"
@@ -1157,6 +1233,13 @@ export const SynthSandboxTab: React.FC<SynthSandboxTabProps> = ({
           </div>
         </div>
       </div>
+
+      {/* React Native & C++ DSP Architecture Modal */}
+      <ReactNativeCppModal
+        isOpen={isReactNativeModalOpen}
+        onClose={() => setIsReactNativeModalOpen(false)}
+        onShowToast={onShowToast}
+      />
     </section>
   );
 };

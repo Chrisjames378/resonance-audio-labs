@@ -32,8 +32,24 @@ export const Header: React.FC<HeaderProps> = ({
               <p className="text-xs text-slate-400 font-mono flex items-center gap-1 flex-wrap">
                 <a href="mailto:resonanceaudiolabs@gmail.com" className="hover:text-indigo-300 transition-colors">resonanceaudiolabs@gmail.com</a>
                 <span>•</span>
+                <a href="https://universal-ai-shopping-agent.ai.studio" target="_blank" rel="noreferrer" className="text-amber-400 hover:underline flex items-center gap-1 font-semibold">
+                  <i className="fas fa-shopping-bag text-[9px]"></i>
+                  <span>shopping-agent</span>
+                  <i className="fas fa-external-link-alt text-[8px]"></i>
+                </a>
+                <span>•</span>
+                <a href="https://synth-horizons-gen-pwa-app-builder.ai.studio" target="_blank" rel="noreferrer" className="text-purple-400 hover:underline flex items-center gap-1">
+                  <span>synth-horizons-pwa</span>
+                  <i className="fas fa-external-link-alt text-[9px]"></i>
+                </a>
+                <span>•</span>
+                <a href="https://altamonte-205-quantum-ai-synth-album-studio.ai.studio" target="_blank" rel="noreferrer" className="text-cyan-400 hover:underline flex items-center gap-1">
+                  <span>altamonte-205</span>
+                  <i className="fas fa-external-link-alt text-[9px]"></i>
+                </a>
+                <span>•</span>
                 <a href="https://sonorus-melodious-v12-3.ai.studio" target="_blank" rel="noreferrer" className="text-emerald-400 hover:underline flex items-center gap-1">
-                  <span>sonorus-melodious-v12-3.ai.studio</span>
+                  <span>sonorus-melodious-v12-3</span>
                   <i className="fas fa-external-link-alt text-[9px]"></i>
                 </a>
                 <span>•</span>
@@ -46,6 +62,39 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Action Controls */}
           <div className="flex items-center gap-2 sm:gap-3">
+            <a
+              href="https://universal-ai-shopping-agent.ai.studio"
+              target="_blank"
+              rel="noreferrer"
+              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-mono font-medium transition-all shadow-sm"
+              title="Open Universal AI Shopping Agent Studio"
+            >
+              <i className="fas fa-shopping-bag text-[10px] text-amber-400"></i>
+              <span>Shopping Agent</span>
+            </a>
+
+            <a
+              href="https://synth-horizons-gen-pwa-app-builder.ai.studio"
+              target="_blank"
+              rel="noreferrer"
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-mono font-medium transition-all shadow-sm"
+              title="Open Synth Horizons Gen PWA App Builder"
+            >
+              <i className="fas fa-layer-group text-[10px] text-purple-400"></i>
+              <span>Synth Horizons PWA</span>
+            </a>
+
+            <a
+              href="https://altamonte-205-quantum-ai-synth-album-studio.ai.studio"
+              target="_blank"
+              rel="noreferrer"
+              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-mono font-medium transition-all shadow-sm"
+              title="Open Altamonte 205 Quantum AI Synth Album Studio"
+            >
+              <i className="fas fa-compact-disc text-[10px] text-cyan-400"></i>
+              <span>Altamonte 205</span>
+            </a>
+
             <a
               href="https://sonorus-melodious-v12-3.ai.studio"
               target="_blank"
