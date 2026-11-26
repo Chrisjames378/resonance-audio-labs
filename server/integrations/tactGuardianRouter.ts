@@ -1,4 +1,5 @@
 import { Router, Request, Response } from "express";
+import { createHash, timingSafeEqual } from "node:crypto";
 
 const router = Router();
 const guardianBase = (process.env.TACT_GUARDIAN_URL || "").replace(/\/+$/, "");
@@ -9,8 +10,8 @@ function configured() {
 function authorized(req: Request, res: Response) {
   const expected = process.env.TACT_BRIDGE_TOKEN || "";
   const supplied = (req.header("authorization") || "").replace(/^Bearer\s+/i, "");
-  if (!expected || supplied.length !== expected.length ||
-      !Buffer.from(supplied).equals(Buffer.from(expected))) {
+  const digest = (value: string) => createHash("sha256").update(value).digest();
+  if (!expected || !timingSafeEqual(digest(supplied), digest(expected))) {
     res.status(401).json({ error: "Unauthorized" });
     return false;
   }
