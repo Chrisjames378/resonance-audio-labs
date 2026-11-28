@@ -789,9 +789,13 @@ Full compliance with Maritime Rules Part 22. Buoy array equipped with IALA speci
     });
   });
 
-  server.listen(PORT, "0.0.0.0", () => {
-    console.log(`Resonance Audio Labs Server with WebSockets running on http://localhost:${PORT}`);
-  });
+  if (!process.env.VERCEL) {
+    server.listen(PORT, "0.0.0.0", () => {
+      console.log(`Resonance Audio Labs Server with WebSockets running on http://localhost:${PORT}`);
+    });
+  }
+
+  return app;
 }
 
 function broadcastToRoom(wss: WebSocketServer, roomCode: string, data: any) {
@@ -803,4 +807,9 @@ function broadcastToRoom(wss: WebSocketServer, roomCode: string, data: any) {
   });
 }
 
-startServer();
+const appPromise = startServer();
+
+export default async function handler(req: express.Request, res: express.Response) {
+  const app = await appPromise;
+  return app(req, res);
+}
