@@ -50,9 +50,13 @@ router.post("/chat", async (req, res) => {
 router.post("/actions/prepare", async (req, res) => {
   if (!authorized(req, res)) return;
   if (!configured()) return res.status(503).json({ configured: false });
-  const { action, payload } = req.body || {};
-  if (typeof action !== "string" || action.length > 100)
-    return res.status(400).json({ error: "A valid action name is required" });
+  const { action, payload = {} } = req.body || {};
+  if (typeof action !== "string" || !/^[a-z0-9._-]{2,80}$/i.test(action))
+    return res.status(400).json({ error: "action must be a 2–80 character identifier" });
+  if (!payload || typeof payload !== "object" || Array.isArray(payload))
+    return res.status(400).json({ error: "payload must be a JSON object" });
+  if (JSON.stringify(payload).length > 16000)
+    return res.status(400).json({ error: "payload exceeds the 16000 character limit" });
   try { return res.json(await guardian("/v1/actions/prepare", "POST", { action, payload })); }
   catch { return res.status(502).json({ error: "Guardian action preparation unavailable" }); }
 });
