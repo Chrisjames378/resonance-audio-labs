@@ -4,6 +4,7 @@ import http from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { GoogleGenAI, Type } from "@google/genai";
 import { createServer as createViteServer } from "vite";
+import tactGuardianRouter from "./server/integrations/tactGuardianRouter";
 
 interface JamRoomState {
   roomCode: string;
@@ -41,6 +42,8 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(express.json());
+
+  app.use("/api/tact-guardian", tactGuardianRouter);
 
   // Health check endpoint
   app.get("/api/health", (req, res) => {
@@ -786,9 +789,13 @@ Full compliance with Maritime Rules Part 22. Buoy array equipped with IALA speci
     });
   });
 
-  server.listen(PORT, "0.0.0.0", () => {
-    console.log(`Resonance Audio Labs Server with WebSockets running on http://localhost:${PORT}`);
-  });
+  if (!process.env.VERCEL) {
+    server.listen(PORT, "0.0.0.0", () => {
+      console.log(`Resonance Audio Labs Server with WebSockets running on http://localhost:${PORT}`);
+    });
+  }
+
+  return app;
 }
 
 function broadcastToRoom(wss: WebSocketServer, roomCode: string, data: any) {
@@ -800,4 +807,9 @@ function broadcastToRoom(wss: WebSocketServer, roomCode: string, data: any) {
   });
 }
 
-startServer();
+const appPromise = startServer();
+
+export default async function handler(req: express.Request, res: express.Response) {
+  const app = await appPromise;
+  return app(req, res);
+}
